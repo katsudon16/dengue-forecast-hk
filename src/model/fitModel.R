@@ -4,9 +4,9 @@ source('../lib/stepAICc.R')
 startyear <- 2002
 
 # collectData
-Rain.CZ <- read.csv("../../dat/csv/changzhou_climate.csv")
-Rain.TT <- read.csv("../../dat/csv/tate_climate.csv")
-Cases.HK <- read.csv("../../dat/csv/HK_Cases.csv")
+Rain.CZ <- read.csv("../../dat/climate/changzhou_climate(clean).csv")
+Rain.TT <- read.csv("../../dat/climate/tate_climate(clean).csv")
+Cases.HK <- read.csv("../../dat/cases/hk_annual_cases.csv")
 #Rain.CZ <- Rain.CZ[ , -which(names(Rain.CZ) %in% c("X"))]
 #Rain.TT <- Rain.TT[ , -which(names(Rain.TT) %in% c("X"))]
 
