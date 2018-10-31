@@ -1,4 +1,5 @@
 *.Rhistory
+*.RData
 
 // any output file
 figure/*
