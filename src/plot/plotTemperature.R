@@ -9,7 +9,7 @@ outputFile <- "../../figure/CC_temp.tiff"
 field <- "mean"
 fieldPlotLabel <- "Average Monthly Temperature (°C)"
 ## choose location between "TC", "CC"
-location <- "TC"
+location <- "CC"
 #---------------------------------
 
 HKCDCC = read.xlsx("../../dat/climate/HKCD.xlsx",

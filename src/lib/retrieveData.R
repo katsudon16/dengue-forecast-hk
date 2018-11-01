@@ -22,7 +22,13 @@ getAnnualRelativeRisk <- function(filePath="../../dat/cases/hk_monthly_cases.csv
   return(allCases)
 }
 
-getMonthlyTemperatureOnType <- function(type="mean", filepath="../../dat/climate/HKCD.xlsx", location="CC") {
+getCasesByDistrict <- function(district, filePath="../../dat/cases/hk_annual_cases_district.csv") {
+  cases <- read.csv(filePath, header=T)
+  cases <- cases[, c("year", district)]
+  return(cases)
+}
+
+getMonthlyTemperatureOnType <- function(type="mean", location="CC", filepath="../../dat/climate/HKCD.xlsx") {
   library(openxlsx)
   allClimates <- read.xlsx(filepath, sheet=paste("HKCD", location, sep=""), startRow=1, colNames=TRUE, detectDates=TRUE)
   allClimates$DM <- as.numeric(gsub("[^.0-9]", "", allClimates$DM))
