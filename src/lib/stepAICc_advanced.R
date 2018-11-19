@@ -1,3 +1,16 @@
+# Source: https://stat.ethz.ch/pipermail/r-help/2009-April/389888.html
+#
+# Refines all "good models" - models with AIC(c) values that differ less than
+#   the best model's delta.
+# @param marginal: a named list to indicate marginality, e.g.,
+#   marginal=list(A=c("B", "C"), B="C") means that A can only enter the
+#   model if B and C are present and B can only enter the model if C is present.
+#   Likewise B can only leave the model if A is not present and C if
+#   A nor B are present
+# @param joint: specify variables that must enter or leave the model simultaneously, e.g.,
+#   joint=list(c("X", "Y"), c("SinX", "CosX"))
+#
+# NOTE: line 97 (AICc formula) may contain error, should be ...2 * edf * (edf+1)...
 stepAICC <- function (object, scope, scale = 0, direction = c("both", 
                                                              "backward", "forward"), trace = 1, steps = 1000, use.start = FALSE, k = 
                        2, bandwidth = 10, marginal = NULL, AICc = TRUE, delta = 2, joint = 
