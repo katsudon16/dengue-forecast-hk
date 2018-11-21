@@ -8,11 +8,17 @@ outputFile <- "../../figure/CC_temp.tiff"
 ## choose field between "min", "mean", "max"
 field <- "mean"
 fieldPlotLabel <- "Average Monthly Temperature (°C)"
-## choose location between "TC", "CC"
-location <- "CC"
+## choose one location from: (the code will automatically detect district/area)
+ # districts: "SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK"
+ # areas    : "NTW", "NTS", "NTE", "KL", "HK"
+location <- "SLW"
 #---------------------------------
 
-HKCDCC = read.xlsx("../../dat/climate/HKCD.xlsx",
+allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
+allAreas <- c("NTW", "NTS", "NTE", "KL", "HK")
+
+excelFilename <- ifelse(location %in% allDistricts, "HKCD", "HKCD_areas")
+HKCDCC = read.xlsx(paste("../../dat/climate/", excelFilename, ".xlsx", sep=""),
                    sheet=paste("HKCD", location, sep=""),
                    startRow=1, colNames=TRUE, detectDates=TRUE)
 fieldLabels <- list(min="Absolute.Daily.Min.(deg.C)",
