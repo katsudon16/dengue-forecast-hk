@@ -1,10 +1,24 @@
 rm(list=ls(all=TRUE))
+if (!require(openxlsx)) install.packages("openxlsx")
 if (!require(ggplot2)) install.packages(ggplot2)
 
-shouldOutputFigure <- TRUE
-outputFile <- "../../plot/rain.tiff"
+#---------USER INPUTS-------------
+shouldOutputFigure <- FALSE
+outputFile <- "../../figure/CC_temp.tiff"
+## choose one location from: (the code will automatically detect district/area)
+# districts: "SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK"
+# areas    : "NTW", "NTS", "NTE", "KL", "HK"
+location <- "SLW"
+#---------------------------------
 
-weather_df2 <- read.csv("../../dat/climate/changzhou_climate(clean).csv", header=T)
+allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
+allAreas <- c("NTW", "NTS", "NTE", "KL", "HK")
+
+excelFilename <- ifelse(location %in% allDistricts, "HKCM", "HKCM_areas")
+weather_df2 <- read.xlsx(paste("../../dat/climate/", excelFilename, ".xlsx", sep=""),
+                   sheet=location,
+                   startRow=1, colNames=TRUE, detectDates=TRUE)
+
 weather_df2$month_txt <- month.abb[weather_df2$month]
 
 # Cleaning: remove "#" on every value in specific columns
