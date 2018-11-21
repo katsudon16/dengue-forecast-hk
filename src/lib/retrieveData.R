@@ -47,6 +47,25 @@ getMonthlyTemperatureOnType <- function(type="mean", location="CC", filepath="..
   return(temp)
 }
 
+getMonthlyRainfallOnType <- function(type="mean", filepath="../../dat/climate/HKCD.xlsx", location="CC") {
+  library(openxlsx)
+  allClimates <- read.xlsx(filepath, sheet=paste("HKCD", location, sep=""), startRow=1, colNames=TRUE, detectDates=TRUE)
+  allClimates$`Total.Rainfall.(mm)` <- as.numeric(gsub("[^.0-9]", "", allClimates$`Total.Rainfall.(mm)`))
+  if (type == "min") {
+    temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), min, na.rm=TRUE)
+  } else if (type == "mean") {
+    temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), mean, na.rm=TRUE)
+  } else {
+    temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), max, na.rm=TRUE)
+  }
+  names(temp)[1] <- "month"
+  names(temp)[2] <- "year"
+  names(temp)[3] <- "rainfall"
+  temp$month_txt <- month.abb[temp$month]
+  rm(list = c("allClimates"))
+  return(temp)
+}
+
 getMonthlyRainFall <- function(filepath="../../dat/climate/changzhou_climate(clean).csv") {
   monthlyClimates <- read.csv(filepath, header=T)
   rainfall <- monthlyClimates[,c("month", "year", "totalrain")]
