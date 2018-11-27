@@ -37,6 +37,10 @@ library(openxlsx)
 
 HKCDTC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD.xlsx",sheet = "HKCDTC",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
+for (fieldLabel in c("Daily.Mean", "Absolute.Daily.Min")) {
+  HKCDCC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDCC[fieldLabel][,]))
+}
+
 # Minimum Month Temprature (cc)
 MMTTC=aggregate(HKCDTC$Daily.Mean,list(HKCDTC$Month,HKCDTC$Year),min,na.rm=TRUE)
 names(MMTTC)[1]="Month"
@@ -63,9 +67,10 @@ RTC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD Monthly Extract.xl
 # Temprature 
 HKCDKP=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD.xlsx",sheet = "HKCDKP",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
-HKCDKP$Daily.Mean=as.numeric(HKCDKP$Daily.Mean,na.rm=TRUE)
 
-HKCDKP$Absolute.Daily.Min=as.numeric(HKCDKP$Absolute.Daily.Min,na.rm=TRUE)
+for (fieldLabel in c("Daily.Mean", "Absolute.Daily.Min")) {
+  HKCDKP[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDKP[fieldLabel][,]))
+}
 
 # Minimum Month Temprature (KP)
 MMTKP=aggregate(HKCDKP$Daily.Mean,list(HKCDKP$Month,HKCDKP$Year),min,na.rm=TRUE)
@@ -95,7 +100,7 @@ RKP=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD Monthly Extract.xl
 
 
 library('MASS')
-# source('stepAICc.R')
+source('stepAICc.R')
 startyear <- 2002
 
 # setting working directory 
@@ -336,3 +341,17 @@ summary(glm_fin6)
 summary(glm_fin11)
 summary(glm_fin12)
 summary(glm_fin13)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

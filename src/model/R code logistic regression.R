@@ -2,22 +2,27 @@ rm(list=ls(all=TRUE))
 # 1. Cheun Chau(CC)  
 # Temprature 
 library(openxlsx)
+
 HKCDCC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD.xlsx",sheet = "HKCDCC",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
+for (fieldLabel in c("Daily.Mean", "Absolute.Daily.Min")) {
+  HKCDCC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDCC[fieldLabel][,]))
+}
+
 # Minimum Month Temprature  (CC)
-MMTCC=aggregate(HKCDCC$DM,list(HKCDCC$Month,HKCDCC$Year),min,na.rm=TRUE)
+MMTCC=aggregate(HKCDCC$Daily.Mean,list(HKCDCC$Month,HKCDCC$Year),min,na.rm=TRUE)
 names(MMTCC)[1]="Month"
 names(MMTCC)[2]="Year"
 names(MMTCC)[3]="MMT"
 
 # Average Monthly Temprature (CC)
-AMTCC=aggregate(HKCDCC$DM,list(HKCDCC$Month,HKCDCC$Year),mean,na.rm=TRUE)
+AMTCC=aggregate(HKCDCC$Daily.Mean,list(HKCDCC$Month,HKCDCC$Year),mean,na.rm=TRUE)
 names(AMTCC)[1]="Month"
 names(AMTCC)[2]="Year"
 names(AMTCC)[3]="AMT"
 
 # Average Daily Minimum Temprature (CC)
-ADMTCC=aggregate(HKCDCC$ADM,list(HKCDCC$Month,HKCDCC$Year),mean,na.rm=TRUE)
+ADMTCC=aggregate(HKCDCC$Absolute.Daily.Min,list(HKCDCC$Month,HKCDCC$Year),mean,na.rm=TRUE)
 names(ADMTCC)[1]="Month"
 names(ADMTCC)[2]="Year"
 names(ADMTCC)[3]="ADMT"
@@ -33,20 +38,24 @@ library(openxlsx)
 
 HKCDTC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD.xlsx",sheet = "HKCDTC",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
+for (fieldLabel in c("Daily.Mean", "Absolute.Daily.Min")) {
+  HKCDTC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDTC[fieldLabel][,]))
+}
+
 # Minimum Month Temprature (cc)
-MMTTC=aggregate(HKCDTC$DM,list(HKCDTC$Month,HKCDTC$Year),min,na.rm=TRUE)
+MMTTC=aggregate(HKCDTC$Daily.Mean,list(HKCDTC$Month,HKCDTC$Year),min,na.rm=TRUE)
 names(MMTTC)[1]="Month"
 names(MMTTC)[2]="Year"
 names(MMTTC)[3]="MMT"
 
 # Average Monthly Temparature (TC)
-AMTTC=aggregate(HKCDTC$DM,list(HKCDTC$Month,HKCDTC$Year),mean,na.rm=TRUE)
+AMTTC=aggregate(HKCDTC$Daily.Mean,list(HKCDTC$Month,HKCDTC$Year),mean,na.rm=TRUE)
 names(AMTTC)[1]="Month"
 names(AMTTC)[2]="Year"
 names(AMTTC)[3]="AMT"
 
 #Average Daily Minimum Temprature (TC)
-ADMTTC=aggregate(HKCDCC$ADM,list(HKCDCC$Month,HKCDCC$Year),mean,na.rm=TRUE)
+ADMTTC=aggregate(HKCDCC$Absolute.Daily.Min,list(HKCDCC$Month,HKCDCC$Year),mean,na.rm=TRUE)
 names(ADMTTC)[1]="Month"
 names(ADMTTC)[2]="Year"
 names(ADMTTC)[3]="ADMT"
@@ -59,12 +68,14 @@ RTC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD Monthly Extract.xl
 # Temprature 
 HKCDKP=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD.xlsx",sheet = "HKCDKP",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
-HKCDKP$DM=as.numeric(HKCDKP$DM,na.rm=TRUE)
-
-HKCDKP$ADM=as.numeric(HKCDKP$ADM,na.rm=TRUE)
+for (fieldLabel in c("Daily.Mean", "Absolute.Daily.Min")) {
+  HKCDKP[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDKP[fieldLabel][,]))
+}
 
 # Minimum Month Temprature (KP)
-MMTKP=aggregate(HKCDKP$DM,list(HKCDKP$Month,HKCDKP$Year),min,na.rm=TRUE)
+
+MMTKP=aggregate(HKCDKP$Daily.Mean,list(HKCDKP$Month,HKCDKP$Year),min,na.rm=TRUE)
+
 names(MMTKP)[1]="Month"
 names(MMTKP)[2]="Year"
 names(MMTKP)[3]="MMT"
@@ -72,13 +83,16 @@ names(MMTKP)[3]="MMT"
 
 # Average Monthly Temparature (KP)
 
-AMTKP=aggregate(HKCDKP$DM,list(HKCDKP$Month,HKCDKP$Year),mean,na.rm=TRUE)
+AMTKP=aggregate(HKCDKP$Daily.Mean,list(HKCDKP$Month,HKCDKP$Year),mean,na.rm=TRUE)
+
 names(AMTKP)[1]="Month"
 names(AMTKP)[2]="Year"
 names(AMTKP)[3]="AMT"
 
 #Average Daily Minimum Temprature (KP)
-ADMTKP=aggregate(HKCDKP$ADM,list(HKCDKP$Month,HKCDKP$Year),mean,na.rm=TRUE)
+
+ADMTKP=aggregate(HKCDKP$Absolute.Daily.Min,list(HKCDKP$Month,HKCDKP$Year),mean,na.rm=TRUE)
+
 names(ADMTKP)[1]="Month"
 names(ADMTKP)[2]="Year"
 names(ADMTKP)[3]="ADMT"
@@ -129,7 +143,6 @@ dfnew <- df
 glm_fin <- stepAIC(glm(CASES ~ 1, family = "binomial",data = dfnew),
                    scope = CASES ~ T1 + T2 + T3 + T4 + T5 + T6 + T7 + R1 + R2 + R3 + R4 + R5 + R6 + R7,
                    direction = "forward")
-
 
 
 # AVerage Mean Temprature(AMTCC)
