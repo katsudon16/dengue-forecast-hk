@@ -2,7 +2,7 @@ rm(list=ls(all=TRUE))
 # 1. Cheun Chau(CC)  
 # Temprature 
 library(openxlsx)
-HKCDCC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD.xlsx",sheet = "HKCDCC",startRow = 1,colNames = TRUE,detectDates = TRUE)
+HKCDCC=read.xlsx("../../dat/climate/HKCD.xlsx",sheet = "HKCDCC",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
 for (fieldLabel in c("Daily.Mean", "Absolute.Daily.Min")) {
   HKCDCC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDCC[fieldLabel][,]))
@@ -28,14 +28,16 @@ names(ADMTCC)[3]="ADMT"
 
 # Rainfall(CC)
 
-RCC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD Monthly Extract.xlsx",sheet = "CC",startRow = 1,colNames = TRUE,detectDates = TRUE)
-
+RCC=read.xlsx("../../dat/climate/changzhou_climate(clean).xlsx",sheet = "Sheet1",startRow = 1,colNames = TRUE,detectDates = TRUE)
+for (fieldLabel in c("totalrain")) {
+  RCC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", RCC[fieldLabel][,]))
+}
 
 # 2. Tat's Cairn (TC)
 # Temprature Data
 library(openxlsx)
 
-HKCDTC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD.xlsx",sheet = "HKCDTC",startRow = 1,colNames = TRUE,detectDates = TRUE)
+HKCDTC=read.xlsx("../../dat/climate/HKCD.xlsx",sheet = "HKCDTC",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
 for (fieldLabel in c("Daily.Mean", "Absolute.Daily.Min")) {
   HKCDCC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDCC[fieldLabel][,]))
@@ -61,11 +63,13 @@ names(ADMTTC)[3]="ADMT"
 
 # Rainfall (TC)
 
-RTC=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD Monthly Extract.xlsx",sheet = "TC",startRow = 1,colNames = TRUE,detectDates = TRUE)
-
+RTC=read.xlsx("../../dat/climate/tate_climate(clean).xlsx",sheet = "Sheet1",startRow = 1,colNames = TRUE,detectDates = TRUE)
+for (fieldLabel in c("totalrain")) {
+  RTC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", RTC[fieldLabel][,]))
+}
 # 3. King's Park (KP)
 # Temprature 
-HKCDKP=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD.xlsx",sheet = "HKCDKP",startRow = 1,colNames = TRUE,detectDates = TRUE)
+HKCDKP=read.xlsx("../../dat/climate/HKCD.xlsx",sheet = "HKCDKP",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
 
 for (fieldLabel in c("Daily.Mean", "Absolute.Daily.Min")) {
@@ -94,26 +98,25 @@ names(ADMTKP)[3]="ADMT"
 
 # Rainfall (TC)
 
-RKP=read.xlsx("C:/Users/tirunesh/Desktop/HK climate data/HKCD Monthly Extract.xlsx",sheet = "KP",startRow = 1,colNames = TRUE,detectDates = TRUE)
+RKP=read.xlsx("../../dat/climate/kingspark_climate.xlsx",sheet = "Sheet1",startRow = 1,colNames = TRUE,detectDates = TRUE)
+for (fieldLabel in c("totalrain")) {
+  RKP[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", RKP[fieldLabel][,]))
+}
 
 # AICC
 
 
 library('MASS')
-source('stepAICc.R')
+source('../lib/stepAICc.R')
 startyear <- 2002
 
-# setting working directory 
-setwd("C:/Users/tirunesh/Desktop/HK climate data")
 
-library('MASS')
 # collectData
 
-Cases.HK <- read.csv("HK_Cases.csv")
+Cases.HK <- read.xlsx("../../dat/cases/hk_annual_cases.xlsx",sheet = "Sheet1",startRow = 1,colNames = TRUE,detectDates = TRUE)
 
 
-
-# 1. AIC for Cheung Chau(CC)
+# 1. GLm model fitting  Cheung Chau(CC)
 
 # Monthly Minimum Temprature (MMTCC)
 
@@ -126,7 +129,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- MMTCC[MMTCC$Month==Month & MMTCC$Year==Year,'MMT']
-    R[Month] <- RCC[RCC$Month==Month & RCC$Year==Year,'totalrain'] 
+    R[Month] <- RCC[RCC$month==Month & RCC$year==Year,'totalrain'] 
   }
   df <- rbind(df, c(Year, 1,T , R))
 }
@@ -134,12 +137,17 @@ names(df)<-c('YEAR','CASES','T1','T2','T3','T4','T5','T6','T7','R1','R2','R3','R
 df$CASES <- Cases.HK$CASES
 dfnew <- df
 
-#Calculating AIC
+# GLM 
 glm_fin <- stepAIC(glm(CASES ~ 1, data = dfnew),
                    scope = CASES ~ T1 + T2 + T3 + T4 + T5 + T6 + T7 + R1 + R2 + R3 + R4 + R5 + R6 + R7,
                    direction = "forward")
 
+# Logistic regression 
 
+
+logReg1 <- stepAIC(glm(CASES ~ 1, family = "binomial",data = dfnew),
+                   scope = CASES ~ T1 + T2 + T3 + T4 + T5 + T6 + T7 + R1 + R2 + R3 + R4 + R5 + R6 + R7,
+                   direction = "forward")
 
 # AVerage Mean Temprature(AMTCC)
 #initialize data
@@ -151,7 +159,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- AMTCC[AMTCC$Month==Month & AMTCC$Year==Year,'AMT']
-    R[Month] <- RCC[RCC$Month==Month & RCC$Year==Year,'totalrain'] 
+    R[Month] <- RCC[RCC$month==Month & RCC$year==Year,'totalrain'] 
   }
   df2 <- rbind(df2, c(Year, 1,T , R))
 }
@@ -173,7 +181,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- ADMTCC[ADMTCC$Month==Month & ADMTCC$Year==Year,'ADMT']
-    R[Month] <- RCC[RCC$Month==Month & RCC$Year==Year,'totalrain'] 
+    R[Month] <- RCC[RCC$month==Month & RCC$year==Year,'totalrain'] 
   }
   df11 <- rbind(df11, c(Year, 1,T , R))
 }
@@ -186,7 +194,7 @@ glm_fin11 <- stepAIC(glm(CASES ~ 1, data = df11new),
                      scope = CASES ~ T1 + T2 + T3 + T4 + T5 + T6 + T7 + R1 + R2 + R3 + R4 + R5 + R6 + R7,
                      direction = "forward")
 
-#1. AIC for Tate's Carn
+#1. GLm model fitting for Tate's Carn
 # Mean Monthly Temprature (MMTTC)
 
 #initialize data
@@ -198,7 +206,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- MMTTC[MMTTC$Month==Month & MMTTC$Year==Year,'MMT']
-    R[Month] <- RTC[RTC$Month==Month & RTC$Year==Year,'totalrain'] 
+    R[Month] <- RTC[RTC$month==Month & RTC$year==Year,'totalrain'] 
   }
   df3 <- rbind(df3, c(Year, 1,T , R))
 }
@@ -223,7 +231,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- AMTTC[AMTTC$Month==Month & AMTTC$Year==Year,'AMT']
-    R[Month] <- RTC[RTC$Month==Month & RTC$Year==Year,'totalrain'] 
+    R[Month] <- RTC[RTC$month==Month & RTC$year==Year,'totalrain'] 
   }
   df4 <- rbind(df4, c(Year, 1,T , R))
 }
@@ -245,7 +253,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- ADMTTC[ADMTTC$Month==Month & ADMTTC$Year==Year,'ADMT']
-    R[Month] <- RTC[RTC$Month==Month & RTC$Year==Year,'totalrain'] 
+    R[Month] <- RTC[RTC$month==Month & RTC$year==Year,'totalrain'] 
   }
   df12 <- rbind(df12, c(Year, 1,T , R))
 }
@@ -258,7 +266,7 @@ glm_fin12 <- stepAIC(glm(CASES ~ 1, data = df12new),
                      scope = CASES ~ T1 + T2 + T3 + T4 + T5 + T6 + T7 + R1 + R2 + R3 + R4 + R5 + R6 + R7,
                      direction = "forward")
 
-#1. AIC for King's Park
+#1. GLm model fitting for King's Park
 # Mean Monthly Temprature (MMTCC)
 
 #initialize data
@@ -270,7 +278,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- MMTKP[MMTKP$Month==Month & MMTKP$Year==Year,'MMT']
-    R[Month] <- RKP[RKP$Month==Month & RKP$Year==Year,'totalrain'] 
+    R[Month] <- RKP[RKP$month==Month & RKP$year==Year,'totalrain'] 
   }
   df5 <- rbind(df5, c(Year, 1,T , R))
 }
@@ -294,7 +302,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- AMTKP[AMTKP$Month==Month & AMTKP$Year==Year,'AMT']
-    R[Month] <- RKP[RKP$Month==Month & RKP$Year==Year,'totalrain'] 
+    R[Month] <- RKP[RKP$month==Month & RKP$year==Year,'totalrain'] 
   }
   df6 <- rbind(df6, c(Year, 1,T , R))
 }
@@ -317,7 +325,7 @@ for (Year in 2002:2018) {
   print(Year)
   for (Month in 1:7) {
     T[Month] <- ADMTKP[ADMTKP$Month==Month & ADMTKP$Year==Year,'ADMT']
-    R[Month] <- RKP[RKP$Month==Month & RKP$Year==Year,'totalrain'] 
+    R[Month] <- RKP[RKP$month==Month & RKP$year==Year,'totalrain'] 
   }
   df13 <- rbind(df13, c(Year, 1,T , R))
 }
