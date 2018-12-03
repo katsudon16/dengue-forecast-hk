@@ -21,9 +21,9 @@ excelFilename <- ifelse(location %in% allDistricts, "HKCD", "HKCD_areas")
 HKCDCC = read.xlsx(paste("../../dat/climate/", excelFilename, ".xlsx", sep=""),
                    sheet=paste("HKCD", location, sep=""),
                    startRow=1, colNames=TRUE, detectDates=TRUE)
-fieldLabels <- list(min="Absolute.Daily.Min.(deg.C)",
-                    mean="DM",
-                    max="Absolute.Daily.Max.(deg.C)")
+fieldLabels <- list(max="Absolute.Daily.Max.Temperature",
+                    mean="Daily.Mean.Temperature",
+                    min="Absolute.Daily.Min.Temperature")
 fieldLabel <- as.character(fieldLabels[field])
 
 # Cleaning: remove "#" on every value

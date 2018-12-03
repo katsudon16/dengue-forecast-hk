@@ -28,9 +28,9 @@ data1 <- read.xlsx(paste("../../dat/climate/", filename, ".xlsx", sep=""),
 data2 <- read.xlsx(paste("../../dat/climate/", filename, ".xlsx", sep=""),
                    sheet=ifelse(filename == "HKCM" | filename == "HKCM_areas", loc2, paste("HKCD", loc2, sep="")),
                    startRow=1, colNames=TRUE, detectDates=TRUE)
-fieldLabels <- list(mintemp="Absolute.Daily.Min.(deg.C)",
-                    meantemp="DM",
-                    maxtemp="Absolute.Daily.Max.(deg.C)",
+fieldLabels <- list(maxtemp="Absolute.Daily.Max.Temperature",
+                    meantemp="Daily.Mean.Temperature",
+                    mintemp="Absolute.Daily.Min.Temperature",
                     rainfall="totalrain")
 fieldLabel <- as.character(fieldLabels[field])
 
