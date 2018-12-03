@@ -28,16 +28,16 @@ getCasesByDistrict <- function(district, filePath="../../dat/cases/hk_annual_cas
   return(cases)
 }
 
-getMonthlyTemperatureOnType <- function(type="mean", location="CC", filepath="../../dat/climate/HKCD.xlsx") {
+getMonthlyTemperatureOnType <- function(type="mean", location="CC", colName="Daily.Mean.Temperature", filepath="../../dat/climate/HKCD.xlsx") {
   library(openxlsx)
   allClimates <- read.xlsx(filepath, sheet=paste("HKCD", location, sep=""), startRow=1, colNames=TRUE, detectDates=TRUE)
-  allClimates$DM <- as.numeric(gsub("[^.0-9]", "", allClimates$DM))
+  allClimates[[colName]] <- as.numeric(gsub("[^.0-9]", "", allClimates[[colName]]))
   if (type == "min") {
-    temp <- aggregate(allClimates$DM, list(allClimates$Month, allClimates$Year), min, na.rm=TRUE)
+    temp <- aggregate(allClimates[[colName]], list(allClimates$Month, allClimates$Year), min, na.rm=TRUE)
   } else if (type == "mean") {
-    temp <- aggregate(allClimates$DM, list(allClimates$Month, allClimates$Year), mean, na.rm=TRUE)
+    temp <- aggregate(allClimates[[colName]], list(allClimates$Month, allClimates$Year), mean, na.rm=TRUE)
   } else {
-    temp <- aggregate(allClimates$DM, list(allClimates$Month, allClimates$Year), max, na.rm=TRUE)
+    temp <- aggregate(allClimates[[colName]], list(allClimates$Month, allClimates$Year), max, na.rm=TRUE)
   }
   names(temp)[1] <- "month"
   names(temp)[2] <- "year"

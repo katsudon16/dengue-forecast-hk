@@ -7,7 +7,7 @@ source("../lib/retrieveData.R")
 
 # plot using MIN temperature or AVERAGE temperature
 temperatureType <- "mean"
-temperatureLabel <- paste("Average Temperature (Â°C)")
+temperatureLabel <- paste("Average Temperature (°C)")
 
 # 1. Retrieve data
 # ---temperature data---
