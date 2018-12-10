@@ -22,6 +22,12 @@ getAnnualRelativeRisk <- function(filePath="../../dat/cases/hk_monthly_cases.csv
   return(allCases)
 }
 
+getAnnualRiskByArea <- function(filepath="../../dat/cases/hk_annual_cases_areas.xlsx") {
+  library(openxlsx)
+  areaRisk <- read.xlsx(filepath, startRow=1, colNames=TRUE)
+  return(areaRisk)
+}
+
 getCasesByDistrict <- function(district, filePath="../../dat/cases/hk_annual_cases_district.csv") {
   cases <- read.csv(filePath, header=T)
   cases <- cases[, c("year", district)]
@@ -55,8 +61,10 @@ getMonthlyRainfallOnType <- function(type="mean", filepath="../../dat/climate/HK
     temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), min, na.rm=TRUE)
   } else if (type == "mean") {
     temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), mean, na.rm=TRUE)
-  } else {
+  } else if (type == "max") {
     temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), max, na.rm=TRUE)
+  } else {
+    temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), sum, na.rm=TRUE)
   }
   names(temp)[1] <- "month"
   names(temp)[2] <- "year"
