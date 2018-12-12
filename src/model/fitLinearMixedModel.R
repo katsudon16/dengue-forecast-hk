@@ -5,9 +5,9 @@ source("../lib/retrieveData.R")
 ## temperatureField: "mean", "absMin", "absMax"
 temperatureField <- "mean"
 ## temperatureType: "mean", "max", "min"
-temperatureType <- "mean" 
+temperatureType <- "min" 
 ## rainfallType: "total", "max"
-rainfallType <- "total"
+rainfallType <- "max"
 minYear <- 2002
 maxYear <- 2018
 #---------------------------------
@@ -26,15 +26,14 @@ areas <- names(areaRisk)[-1]
 
 areasT <- list()
 areasR <- list()
-# TODO: optimize retrieving data
 for (area in areas) {
+  data <- readDFFromFile(area, filePath=climateFile)
   areasT[[area]] <- getMonthlyTemperatureOnType(type=temperatureType,
-                                                location=area,
                                                 colName=temperatureColLabel,
-                                                filepath=climateFile)
+                                                df=data)
   areasR[[area]] <- getMonthlyRainfallOnType(type=rainfallType,
-                                             filepath=climateFile,
-                                             location=area)
+                                             location=area,
+                                             df=data)
 }
 
 df <- data.frame()
@@ -50,6 +49,8 @@ for (year in minYear:maxYear) {
       T[month] <- Tdata[Tdata$month==month & Tdata$year==year, "temperature"]
       R[month] <- Rdata[Rdata$month==month & Rdata$year==year, "rainfall"]
     }
+    # missing data result in -Inf
+    if (length(R[!is.finite(R)]) > 0) next
     df <- rbind(df, c(area_i, year, risk, T, R))
   }
 }
@@ -62,6 +63,17 @@ df$AREA <- areas[df$AREA]
 df$AREA <- as.factor(df$AREA)
 
 if (!require("lme4")) install.packages("lme4")
-res <- lmer(RISK ~ T1 + T2 + T3 + T4 + T5 + T6 + T7 +
-                   R1 + R2 + R3 + R4 + R5 + R6 + R7 + (1 | AREA),
-            data=df)
+source("../lib/stepAIC_custom.R")
+
+res <- stepAIC(df, model=glmmTMB,
+               explanatoryVars=c("T1", "T2", "T3", "T4", "T5", "T6", "T7",
+                                 "R1", "R2", "R3", "R4", "R5", "R6", "R7"),
+               randomFormula="(1 | AREA)",
+               ziformula=~1, REML=TRUE)
+
+
+# res <- lmer(RISK ~ T1 + T2 + T3 + T4 + T5 + T6 + T7 +
+#                    R1 + R2 + R3 + R4 + R5 + R6 + R7 + (1 | AREA),
+#             data=df)
+res <- lmer(RISK ~ T1 + (1 | AREA), data=df)
+res <- glmmTMB(RISK ~ R5 + R4 + (1 | AREA), data=df, ziformula=~1, REML=TRUE)
