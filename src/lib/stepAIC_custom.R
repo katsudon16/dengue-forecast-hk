@@ -2,7 +2,15 @@ isAICValid <- function(val) {
   return(!(is.null(val) | is.na(val) | !is.finite(val)))
 }
 
-stepAIC <- function(df, model=glm, explanatoryVars=c(), randomFormula="", ...) {
+getAICorAICc <- function(model, isAICc) {
+  if (isAICc) {
+    return(AICc(model))
+  }
+  return(AIC(model))
+}
+
+stepAIC <- function(df, model=glm, explanatoryVars=c(), randomFormula="", isAICc=FALSE, ...) {
+  if (!require("MuMIn")) install.packages("MuMIn")
   maxPosAIC <- 1500 # maximum possible AIC
   minAIC <- maxPosAIC
   notPickedVars <- explanatoryVars
@@ -11,7 +19,7 @@ stepAIC <- function(df, model=glm, explanatoryVars=c(), randomFormula="", ...) {
   
   # base case
   finalModel <- model(as.formula(tempFormula), data=df, ...)
-  minAIC <- AIC(finalModel)
+  minAIC <- getAICorAICc(finalModel, isAICc)
   if (!isAICValid(minAIC)) {
     minAIC <- maxPosAIC
     finalModel <- NULL
@@ -22,17 +30,16 @@ stepAIC <- function(df, model=glm, explanatoryVars=c(), randomFormula="", ...) {
     tempModel <- NULL
     for (i in 1:length(notPickedVars)) {
       testFormula <- paste(tempFormula, notPickedVars[i], sep=" + ")
+      testModel <- NULL
       try <- tryCatch({
         testModel <- model(as.formula(testFormula), data=df, ...)
       }, warning=function(war) {
-        print(paste("Warning occurs:", war))
         return(NULL)
       }, error=function(err) {
-        print(paste("Error occurs:", err))
         return(NULL)
       })
       if (is.null(testModel)) next
-      testAIC <- AIC(testModel)
+      testAIC <- getAICorAICc(testModel, isAICc)
       if (!isAICValid(testAIC)) next
       if (testAIC < tempAIC) {
         tempAIC <- testAIC
@@ -46,6 +53,7 @@ stepAIC <- function(df, model=glm, explanatoryVars=c(), randomFormula="", ...) {
     print(summary(tempModel))
     finalModel <- tempModel
     minAIC <- tempAIC
+    print(minAIC)
     tempFormula <- paste(tempFormula, notPickedVars[tempNextVarIdx], sep=" + ")
     notPickedVars <- notPickedVars[-tempNextVarIdx]
   }

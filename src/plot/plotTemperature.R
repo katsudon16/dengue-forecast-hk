@@ -8,10 +8,12 @@ outputFile <- "../../figure/CC_temp.tiff"
 ## choose field between "min", "mean", "max"
 field <- "mean"
 fieldPlotLabel <- "Average Monthly Temperature (°C)"
+## aggregate type, could be "min", "mean", "max", or "sum"
+aggregateType <- "mean"
 ## choose one location from: (the code will automatically detect district/area)
  # districts: "SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK"
- # areas    : "NTW", "NTS", "NTE", "KL", "HK"
-location <- "SLW"
+ # areas    : "NTN", "NTS", "KL", "HK"
+location <- "NTS"
 #---------------------------------
 
 allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
@@ -29,7 +31,7 @@ fieldLabel <- as.character(fieldLabels[field])
 # Cleaning: remove "#" on every value
 HKCDCC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDCC[fieldLabel][,]))
 
-MMTCC = aggregate(HKCDCC[fieldLabel], list(HKCDCC$Month,HKCDCC$Year), FUN=field, na.rm=TRUE)
+MMTCC = aggregate(HKCDCC[fieldLabel], list(HKCDCC$Month,HKCDCC$Year), FUN=aggregateType, na.rm=TRUE)
 
 names(MMTCC)[1] = "Month"
 names(MMTCC)[2] = "Year"

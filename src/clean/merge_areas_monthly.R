@@ -7,7 +7,7 @@ library("crayon")
 
 #---------USER INPUTS-------------
 # districts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
-districts <- c("KP", "TC") # to be merged
+districts <- c("KP", "HK") # to be merged
 # output file
 excelFile <- "d:/workspace/dengue-forecast-hk/dat/climate/HKCD_test.xlsx"
 sheetName <- "HK"
@@ -74,9 +74,19 @@ getAverageRow <- function(i) {
     for (d_i in 1:length(districts)) {
       if (is.na(data[[districts[d_i]]][[col]][i])) next
       isNA <- FALSE
-      totalValidDays <- totalValidDays + totalDays
       if (col %in% avgCols) {
-        avg <- avg + totalDays * data[[districts[d_i]]][[col]][i]
+        if (districts[d_i] == "HK") {
+          if (col == "totalrain") {
+            totalValidDays <- totalValidDays + 4 * totalDays
+            avg <- avg + totalDays * 4 * data[[districts[d_i]]][[col]][i]
+          } else {
+            totalValidDays <- totalValidDays + 2 * totalDays
+            avg <- avg + totalDays * 2 * data[[districts[d_i]]][[col]][i]
+          }
+        } else {
+          totalValidDays <- totalValidDays + totalDays
+          avg <- avg + totalDays * data[[districts[d_i]]][[col]][i]
+        }
       } else if (col == "absmax") {
         maxVal <- max(maxVal, data[[districts[d_i]]][[col]][i])
       } else {
