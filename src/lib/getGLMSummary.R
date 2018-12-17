@@ -1,13 +1,20 @@
+# For summerizing  differnt models in to one table
 
+# method 1 : Model selection approach summerizes and compare  models based on their AICc values 
 
-# 1
+# Inputes : Models names,as Model1, Model2, ..... 
+
 library(MuMIn)
-(msAICc <- model.sel(Model2,Model3))
+msAICc <- model.sel(Model1,Model2)
 model.sel(msAICc, rank = AIC, rank.args = alist(k = log(nobs(x))))
 
 
 
-# 2
+
+# Method 2 ,gives summary of coeffcients, doesnot compare 
+
+# Inputes : Models names,as Model1, Model2, ..... 
+
 library(broom)
 
 models <- list(Model1,Model2)
@@ -22,25 +29,3 @@ results <- all_coefs %>% select(-(std.error:p.value)) %>%
   spread(term, estimate)
 
 
-#3 
-
-library(MuMIn)
-#R2 <- function(x) summary(x)$r.squared
-ms <- model.sel(Model1,Model2)
-
-i <- 1:2 # indices of columns with model terms
-response <- "a"
-
-res <- as.data.frame(ms)
-v <- names(ms)[i]
-v[v == "(Intercept)"] <- 1
-
-# create formula-like model names:
-mnames <- apply(res[, i], 1, function(x) 
-  deparse(simplify.formula(reformulate(v[!is.na(x)], response = response))))
-## OR
-#   mnames <- apply(res[, i], 1, function(x)
-#          sapply(attr(ms, "modelList"), function(x) deparse(formula(x)))
-
-res <- cbind(model = mnames, res[, -i])
-Hmisc::latex(res, file = "")
