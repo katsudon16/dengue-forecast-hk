@@ -4,7 +4,7 @@
 
  #  Input temprature variables in 'Ttype' and   Inpute Rainfall variables in 'Rtype'   
 
-getGLM <- function(Ttype="mean", Rtype="max", location="CC", colName="Daily.Mean", filepath="../../dat/climate/HKCD.xlsx") {
+getGLM <- function(Ttype="mean", Rtype="max", location="CC", colName="Daily.Mean.Temperature", filepath="../../dat/climate/HKCD.xlsx") {
  
    # 1. collect and clean Monthly Temperature and  Rainfall data 
   
