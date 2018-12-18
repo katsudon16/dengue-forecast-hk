@@ -22,15 +22,34 @@ getAnnualRelativeRisk <- function(filePath="../../dat/cases/hk_monthly_cases.csv
   return(allCases)
 }
 
+getAnnualRiskByArea <- function(filePath="../../dat/cases/hk_annual_cases_areas.xlsx") {
+  library(openxlsx)
+  areaRisk <- read.xlsx(filePath, startRow=1, colNames=TRUE)
+  return(areaRisk)
+}
+
 getCasesByDistrict <- function(district, filePath="../../dat/cases/hk_annual_cases_district.csv") {
   cases <- read.csv(filePath, header=T)
   cases <- cases[, c("year", district)]
   return(cases)
 }
 
-getMonthlyTemperatureOnType <- function(type="mean", location="CC", colName="Daily.Mean.Temperature", filepath="../../dat/climate/HKCD.xlsx") {
+readDFFromFile <- function(location="CC", filePath="../../dat/climate/HKCD.xlsx") {
   library(openxlsx)
-  allClimates <- read.xlsx(filepath, sheet=paste("HKCD", location, sep=""), startRow=1, colNames=TRUE, detectDates=TRUE)
+  data <- read.xlsx(filePath,
+                    sheet=paste("HKCD", location, sep=""),
+                    startRow=1, colNames=TRUE, detectDates=TRUE)
+  return(data)
+}
+
+getMonthlyTemperatureOnType <- function(type="mean", location="CC", colName="Daily.Mean.Temperature", filePath="../../dat/climate/HKCD.xlsx", df=NULL) {
+  allClimates <- df
+  if (is.null(allClimates)) {
+    library(openxlsx)
+    allClimates <- read.xlsx(filePath,
+                             sheet=paste("HKCD", location, sep=""),
+                             startRow=1, colNames=TRUE, detectDates=TRUE)
+  }
   allClimates[[colName]] <- as.numeric(gsub("[^.0-9]", "", allClimates[[colName]]))
   if (type == "min") {
     temp <- aggregate(allClimates[[colName]], list(allClimates$Month, allClimates$Year), min, na.rm=TRUE)
@@ -47,16 +66,23 @@ getMonthlyTemperatureOnType <- function(type="mean", location="CC", colName="Dai
   return(temp)
 }
 
-getMonthlyRainfallOnType <- function(type="mean", filepath="../../dat/climate/HKCD.xlsx", location="CC") {
-  library(openxlsx)
-  allClimates <- read.xlsx(filepath, sheet=paste("HKCD", location, sep=""), startRow=1, colNames=TRUE, detectDates=TRUE)
+getMonthlyRainfallOnType <- function(type="mean", filePath="../../dat/climate/HKCD.xlsx", location="CC", df=NULL) {
+  allClimates <- df
+  if (is.null(allClimates)) {
+    library(openxlsx)
+    allClimates <- read.xlsx(filePath,
+                             sheet=paste("HKCD", location, sep=""),
+                             startRow=1, colNames=TRUE, detectDates=TRUE)
+  }
   allClimates$`Total.Rainfall.(mm)` <- as.numeric(gsub("[^.0-9]", "", allClimates$`Total.Rainfall.(mm)`))
   if (type == "min") {
     temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), min, na.rm=TRUE)
   } else if (type == "mean") {
     temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), mean, na.rm=TRUE)
-  } else {
+  } else if (type == "max") {
     temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), max, na.rm=TRUE)
+  } else {
+    temp <- aggregate(allClimates$`Total.Rainfall.(mm)`, list(allClimates$Month, allClimates$Year), sum, na.rm=TRUE)
   }
   names(temp)[1] <- "month"
   names(temp)[2] <- "year"
@@ -66,16 +92,16 @@ getMonthlyRainfallOnType <- function(type="mean", filepath="../../dat/climate/HK
   return(temp)
 }
 
-getMonthlyRainFall <- function(filepath="../../dat/climate/changzhou_climate(clean).csv") {
-  monthlyClimates <- read.csv(filepath, header=T)
+getMonthlyRainFall <- function(filePath="../../dat/climate/changzhou_climate(clean).csv") {
+  monthlyClimates <- read.csv(filePath, header=T)
   rainfall <- monthlyClimates[,c("month", "year", "totalrain")]
   rainfall$totalrain <- as.numeric(gsub("[^.0-9]", "", rainfall$totalrain))
   rm(list = c("monthlyClimates"))
   return(rainfall)
 }
 
-getOvitrapIndex <- function(filepath="data/ovitrap_CC.csv") {
-  ovitrap <- read.csv(filepath, header=T)
+getOvitrapIndex <- function(filePath="data/ovitrap_CC.csv") {
+  ovitrap <- read.csv(filePath, header=T)
   names(ovitrap) <- c("year", "month", "percentage")
   ovitrap$month_txt <- month.abb[ovitrap$month]
   return(ovitrap)

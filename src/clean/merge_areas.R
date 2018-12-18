@@ -7,7 +7,7 @@ library("crayon")
 
 #---------USER INPUTS-------------
 # districts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
-districts <- c("TC", "KP") # to be merged
+districts <- c("HK", "KP") # to be merged
 # output file
 excelFile <- "d:/workspace/dengue-forecast-hk/dat/climate/HKCD_test.xlsx"
 sheetName <- "HKCDNTW"
@@ -56,8 +56,18 @@ getAverageRow <- function(i) {
     for (d_i in 1:length(districts)) {
       if (is.na(data[[districts[d_i]]][[col]][i])) next
       isNA <- FALSE
-      total <- total + 1
-      avg <- avg + data[[districts[d_i]]][[col]][i]
+      if (districts[d_i] == "HK") {
+        if (col == "Total.Rainfall.(mm)") {
+          total <- total + 4
+          avg <- avg + 4 * data[[districts[d_i]]][[col]][i]
+        } else {
+          total <- total + 2
+          avg <- avg + 2 * data[[districts[d_i]]][[col]][i]
+        }
+      } else {
+        total <- total + 1
+        avg <- avg + data[[districts[d_i]]][[col]][i]
+      }
     }
     if (!isNA) {
       avg <- avg / total
