@@ -19,6 +19,9 @@ family <- poisson # poisson or nbinom2
 areas <- c("NTS", "NTN", "HKL")
 predictType <- "conditional"
 useAICc <- TRUE
+# if showTruePrediction = TRUE, show model prediction result,
+#   else, show cross validation prediction results
+showTruePrediction <- TRUE
 #---------------------------------
 
 temperatureColLabels <- c(
@@ -85,11 +88,19 @@ if (is.null(formula)) {
   res <- glmmTMB(formula, data=df)
 }
 
-source("../lib/cross_validations.R")
-pred <- leaveOneOut(df, "RISK", res, modelType=glmmTMB,
-                    resDfCols=c("AREA", "YEAR", "RISK"),
-                    formula=formula(res), family=family,
-                    predictType=predictType)
+pred <- NULL
+if (showTruePrediction) {
+  pred <- df[c("AREA", "YEAR", "RISK")]
+  pred$PRED <- round(predict(res, newdata=df, type=predictType))
+  pred[pred$PRED < 0, "PRED"] <- 0
+  pred$AREA <- as.numeric(pred$AREA)
+} else {
+  source("../lib/cross_validations.R")
+  pred <- leaveOneOut(df, "RISK", res, modelType=glmmTMB,
+                      resDfCols=c("AREA", "YEAR", "RISK"),
+                      formula=formula(res), family=family,
+                      predictType=predictType)
+}
 if (!"ALL" %in% areas) {
   areas <- c("ALL", areas)
 }

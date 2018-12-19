@@ -4,13 +4,13 @@ if (!require(ggplot2)) install.packages("ggplot2")
 if (!require(gridExtra)) install.packages("gridExtra")
 
 #---------USER INPUTS-------------
-shouldOutputFigure <- FALSE
+shouldOutputFigure <- TRUE
 outputFile <- "../../figure/area_temp.tiff"
-outputPlotWidth <- 10
-outputPlotHeight <- 10
+outputPlotWidth <- 12
+outputPlotHeight <- 3
 ## choose temperature field between "absMin", "mean", "absMax"
 field <- "mean"
-fieldPlotLabel <- "Average Monthly Temperature (°C)"
+fieldPlotLabel <- "Max Daily Mean Temperature (°C)"
 ## aggregate type, could be "min", "mean", "max", or "sum"
 aggregateType <- "max"
 ## choose a list of location from: (the code will automatically detect district/area)
@@ -18,7 +18,10 @@ aggregateType <- "max"
  # areas    : "NTN", "NTS", "KL", "HK", "HKL"
  # the plots will be divided into grids
 locations <- c("NTN", "NTS", "HKL")
-nrow <- 2 # number of grid rows
+# plot's y axis limit
+plotYmax <- -1
+plotYmin <- 1000
+gridRowNum <- 1 # number of grid rows
 #---------------------------------
 
 grids <- c()
@@ -47,11 +50,18 @@ for (loc in locations) {
   names(temp)[3] = field
   
   temp$month_txt = month.abb[temp$Month]
-  
-  grids[[loc]] <- ggplot(data=temp, aes(x=month_txt,y=get(field))) +
+  grids[[loc]] <- temp
+  plotYmax <- max(plotYmax, temp[[field]])
+  plotYmin <- min(plotYmin, temp[[field]])
+}
+
+commands <- ifelse(shouldOutputFigure, "arrangeGrob(", "grid.arrange(")
+for (loc in locations) {
+  grids[[loc]] <- ggplot(data=grids[[loc]], aes(x=month_txt,y=get(field))) +
+    ylim(plotYmin, plotYmax) +
     ggtitle(loc) +
     geom_boxplot(aes(month_txt, get(field)), outlier.shape = NA) +
-    geom_point(aes(colour = cut(Year, c(2001, 2002, 2017, 2018))), position=jitter, alpha=0.5, size=2) +
+    geom_point(aes(colour = cut(Year, c(2001, 2002, 2017, 2018))), position=jitter, alpha=0.5, size=1) +
     scale_color_manual(name = "Years",
                        values = c("(2001,2002]" = "Green",
                                   "(2002,2017]" = "Black",
@@ -60,13 +70,9 @@ for (loc in locations) {
     scale_x_discrete(limits=month.abb[1:8]) +
     labs(x = "Month") +
     labs(y = fieldPlotLabel)
-}
-
-commands <- ifelse(shouldOutputFigure, "arrangeGrob(", "grid.arrange(")
-for (loc in locations) {
   commands <- paste(commands, "grids$", loc, ", ", sep="")
 }
-commands <- paste(commands, "nrow=", nrow, ")", sep="")
+commands <- paste(commands, "nrow=", gridRowNum, ")", sep="")
 g <- eval(parse(text=commands))
 if (shouldOutputFigure) {
   ggsave(outputFile, g, units="in", width=outputPlotWidth,
