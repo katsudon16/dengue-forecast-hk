@@ -9,13 +9,13 @@ getAICorAICc <- function(model, isAICc) {
   return(AIC(model))
 }
 
-stepAIC <- function(df, model=glm, explanatoryVars=c(), randomFormula="", isAICc=FALSE, ...) {
+stepAIC <- function(df, model=glm, responseVar="", explanatoryVars=c(), randomFormula="", isAICc=FALSE, ...) {
   if (!require("MuMIn")) install.packages("MuMIn")
   maxPosAIC <- 1500 # maximum possible AIC
   minAIC <- maxPosAIC
   notPickedVars <- explanatoryVars
   # temporary formula
-  tempFormula <- paste("RISK ~ ", randomFormula, sep="")
+  tempFormula <- paste(responseVar, " ~ ", randomFormula, sep="")
   
   # base case
   finalModel <- model(as.formula(tempFormula), data=df, ...)

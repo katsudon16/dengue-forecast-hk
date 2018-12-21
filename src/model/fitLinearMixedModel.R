@@ -17,7 +17,7 @@ maxYear <- 2018
 formula <- NULL
 family <- poisson # poisson or nbinom2
 areas <- c("NTS", "NTN", "HKL")
-predictType <- "conditional"
+predictType <- "link"
 useAICc <- TRUE
 # if showTruePrediction = TRUE, show model prediction result,
 #   else, show cross validation prediction results
@@ -73,12 +73,16 @@ names(df) <- c("AREA", "YEAR", "RISK",
 df$AREA <- as.factor(df$AREA)
 rm(Rdata, Tdata, data, areaRisk, areasR, areasT)
 
+# handle heterogeneity using log10(Y+1) transformation
+df$LogNeg <- round(log10(df$RISK + 1))
+
 if (!require("glmmTMB")) install.packages("glmmTMB")
 if (!require("lme4")) install.packages("lme4")
 source("../lib/stepAIC_custom.R")
 
 if (is.null(formula)) {
   res <- stepAIC(df, model=glmmTMB,
+                 responseVar="RISK",
                  explanatoryVars=c("T2", "T3", "T4", "T5", "T6", "T7", "T8",
                                    "R2", "R3", "R4", "R5", "R6", "R7", "R8"),
                  randomFormula="(1 | AREA)",
