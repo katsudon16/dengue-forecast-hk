@@ -1,58 +1,82 @@
 rm(list=ls(all=TRUE))
 if (!require(openxlsx)) install.packages("openxlsx")
 if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(gridExtra)) install.packages("gridExtra")
 
 #---------USER INPUTS-------------
-shouldOutputFigure <- FALSE
-outputFile <- "../../figure/CC_temp.tiff"
-## choose field between "min", "mean", "max"
+shouldOutputFigure <- TRUE
+outputFile <- "../../figure/area_temp.tiff"
+outputPlotWidth <- 12
+outputPlotHeight <- 3
+## choose temperature field between "absMin", "mean", "absMax"
 field <- "mean"
-fieldPlotLabel <- "Average Monthly Temperature (°C)"
+fieldPlotLabel <- "Max Daily Mean Temperature (°C)"
 ## aggregate type, could be "min", "mean", "max", or "sum"
-aggregateType <- "mean"
-## choose one location from: (the code will automatically detect district/area)
+aggregateType <- "max"
+## choose a list of location from: (the code will automatically detect district/area)
  # districts: "SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK"
- # areas    : "NTN", "NTS", "KL", "HK"
-location <- "NTS"
+ # areas    : "NTN", "NTS", "KL", "HK", "HKL"
+ # the plots will be divided into grids
+locations <- c("NTN", "NTS", "HKL")
+# plot's y axis limit
+plotYmax <- -1
+plotYmin <- 1000
+gridRowNum <- 1 # number of grid rows
 #---------------------------------
 
+grids <- c()
 allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
-allAreas <- c("NTW", "NTS", "NTE", "KL", "HK")
+allAreas <- c("NTS", "NTN", "KL", "HK", "HKL")
 
-excelFilename <- ifelse(location %in% allDistricts, "HKCD", "HKCD_areas")
-HKCDCC = read.xlsx(paste("../../dat/climate/", excelFilename, ".xlsx", sep=""),
-                   sheet=paste("HKCD", location, sep=""),
-                   startRow=1, colNames=TRUE, detectDates=TRUE)
-fieldLabels <- list(max="Absolute.Daily.Max.Temperature",
+fieldLabels <- list(absMax="Absolute.Daily.Max.Temperature",
                     mean="Daily.Mean.Temperature",
-                    min="Absolute.Daily.Min.Temperature")
+                    absMin="Absolute.Daily.Min.Temperature")
 fieldLabel <- as.character(fieldLabels[field])
+jitter <- position_jitter(width=0.25, height=0)
 
-# Cleaning: remove "#" on every value
-HKCDCC[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", HKCDCC[fieldLabel][,]))
-
-MMTCC = aggregate(HKCDCC[fieldLabel], list(HKCDCC$Month,HKCDCC$Year), FUN=aggregateType, na.rm=TRUE)
-
-names(MMTCC)[1] = "Month"
-names(MMTCC)[2] = "Year"
-names(MMTCC)[3] = field
-
-Temp.CC_df = MMTCC
-Temp.CC_df$month_txt = month.abb[Temp.CC_df$Month]
-
-if (shouldOutputFigure) {
-  ggsave(outputFile, units="in", width=6, height=4.2, dpi=300, compression = "lzw")
+for (loc in locations) {
+  excelFilename <- ifelse(loc %in% allDistricts, "HKCD", "HKCD_areas")
+  data <- read.xlsx(paste("../../dat/climate/", excelFilename, ".xlsx", sep=""),
+                    sheet=paste("HKCD", loc, sep=""),
+                    startRow=1, colNames=TRUE, detectDates=TRUE)
+  
+  # Cleaning: remove "#" on every value
+  data[fieldLabel] <- as.numeric(gsub("[^.0-9]", "", data[fieldLabel][,]))
+  
+  temp = aggregate(data[fieldLabel], list(data$Month,data$Year), FUN=aggregateType, na.rm=TRUE)
+  
+  names(temp)[1] = "Month"
+  names(temp)[2] = "Year"
+  names(temp)[3] = field
+  
+  temp$month_txt = month.abb[temp$Month]
+  grids[[loc]] <- temp
+  plotYmax <- max(plotYmax, temp[[field]])
+  plotYmin <- min(plotYmin, temp[[field]])
 }
 
-jitter <- position_jitter(width=0.25, height=0)
-ggplot(data=Temp.CC_df, aes(x=month_txt,y=get(field))) +
-  geom_boxplot(aes(month_txt, get(field)), outlier.shape = NA) +
-  geom_point(aes(colour = cut(Year, c(2001, 2002, 2017, 2018))), alpha=0.5, position=jitter, size=2) +
-  scale_color_manual(name = "Years",
-                     values = c("(2001,2002]" = "Green",
-                                "(2002,2017]" = "Black",
-                                "(2017,2018]" = "Red"),
-                     labels = c("2002", "2003-2017", "2018")) +
-  scale_x_discrete(limits=month.abb[1:8]) +
-  labs(x = "Month") +
-  labs(y = fieldPlotLabel)
+commands <- ifelse(shouldOutputFigure, "arrangeGrob(", "grid.arrange(")
+for (loc in locations) {
+  grids[[loc]] <- ggplot(data=grids[[loc]], aes(x=month_txt,y=get(field))) +
+    ylim(plotYmin, plotYmax) +
+    ggtitle(loc) +
+    geom_boxplot(aes(month_txt, get(field)), outlier.shape = NA) +
+    geom_point(aes(colour = cut(Year, c(2001, 2002, 2017, 2018))), position=jitter, alpha=0.5, size=1) +
+    scale_color_manual(name = "Years",
+                       values = c("(2001,2002]" = "Green",
+                                  "(2002,2017]" = "Black",
+                                  "(2017,2018]" = "Red"),
+                       labels = c("2002", "2003-2017", "2018")) +
+    scale_x_discrete(limits=month.abb[1:8]) +
+    labs(x = "Month") +
+    labs(y = fieldPlotLabel)
+  commands <- paste(commands, "grids$", loc, ", ", sep="")
+}
+commands <- paste(commands, "nrow=", gridRowNum, ")", sep="")
+g <- eval(parse(text=commands))
+if (shouldOutputFigure) {
+  ggsave(outputFile, g, units="in", width=outputPlotWidth,
+         height=outputPlotHeight, dpi=300, compression = "lzw")
+} else {
+  g
+}
