@@ -15,11 +15,11 @@ locations <- c("NTN", "NTS", "HKL")
 ## aggregate type, could be "max" or "sum"
 aggregateType <- "max"
 fieldPlotLabel <- "Max Daily Rain (mm)"
+gridRowNum <- 1 # number of grid rows
+#---------------------------------
 # plot's y axis limit
 plotYmax <- -1
 plotYmin <- 1000
-gridRowNum <- 1 # number of grid rows
-#---------------------------------
 
 grids <- c()
 allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")

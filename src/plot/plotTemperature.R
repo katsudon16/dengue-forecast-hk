@@ -18,11 +18,12 @@ aggregateType <- "max"
  # areas    : "NTN", "NTS", "KL", "HK", "HKL"
  # the plots will be divided into grids
 locations <- c("NTN", "NTS", "HKL")
+gridRowNum <- 1 # number of grid rows
+#---------------------------------
+
 # plot's y axis limit
 plotYmax <- -1
 plotYmin <- 1000
-gridRowNum <- 1 # number of grid rows
-#---------------------------------
 
 grids <- c()
 allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
