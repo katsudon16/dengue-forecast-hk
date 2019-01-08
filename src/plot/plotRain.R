@@ -6,12 +6,12 @@ if (!require(gridExtra)) install.packages("gridExtra")
 #---------USER INPUTS-------------
 shouldOutputFigure <- TRUE
 outputFile <- "../../figure/area_rain.tiff"
-outputPlotWidth <- 12
+outputPlotWidth <- 4
 outputPlotHeight <- 3
 ## choose one location from: (the code will automatically detect district/area)
 # districts: "SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK"
 # areas    : "NTN", "NTS", "KL", "HK", "HKL"
-locations <- c("NTN", "NTS", "HKL")
+locations <- c("ALL")
 ## aggregate type, could be "max" or "sum"
 aggregateType <- "max"
 fieldPlotLabel <- "Max Daily Rain (mm)"
@@ -23,7 +23,7 @@ plotYmin <- 1000
 
 grids <- c()
 allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
-allAreas <- c("NTN", "NTS", "KL", "HK", "HKL")
+allAreas <- c("NTN", "NTS", "KL", "HK", "HKL", "ALL")
 jitter <- position_jitter(width=0.25, height=0)
 
 for (loc in locations) {

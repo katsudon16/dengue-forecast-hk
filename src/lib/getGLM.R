@@ -8,7 +8,7 @@
 # - glmFormula (formula)       : the glm formula if specified
 # returns a glm model
 getGLM <- function(Ttype="mean", Rtype="max", location="CC", temperatureColName="Daily.Mean.Temperature",
-                   filepath="../../dat/climate/HKCD.xlsx", glmFormula=NULL) {
+                   filepath="../../dat/climate/HKCD.xlsx", glmFormula=NULL, ...) {
   dirName <- "dengue-forecast-hk/src"
   srcDir <- substr(getwd(), 0, regexpr(dirName, getwd(), fixed=TRUE)[1] + nchar(dirName))
   source(paste(srcDir, "lib/retrieveData.R", sep=""))
@@ -32,24 +32,24 @@ getGLM <- function(Ttype="mean", Rtype="max", location="CC", temperatureColName=
   df <- data.frame()
   
   for (year in 2002:2018) {
-    for (month in 1:7) {
+    for (month in 1:8) {
       T[month] <- temp[temp$month==month & temp$year==year, 'temperature']
       R[month] <- rain[rain$month==month & rain$year==year, 'rainfall']
     }
     df <- rbind(df, c(year, 1, T, R))
   }
-  names(df)<-c('YEAR','CASES','T1','T2','T3','T4','T5','T6','T7','R1','R2','R3','R4','R5','R6','R7')
+  names(df)<-c('YEAR','CASES','T1','T2','T3','T4','T5','T6','T7','T8','R1','R2','R3','R4','R5','R6','R7','R8')
   df$CASES <- Cases.HK$CASES
  
   # 3. Model fitting
   glm_fin <- NULL  
   if (!is.null(glmFormula)) {
     # 3a. General Linear Model
-    glm_fin <- glm(glmFormula, data = df , family = poisson)
+    glm_fin <- glm(glmFormula, data = df , ...)
   } else {
     # 3b. Selecting best model based on AIC criteria 
-    glm_fin <- MASS::stepAIC(glm(CASES ~ 1, data = df),
-                             scope = CASES ~ T1 + T2 + T3 + T4 + T5 + T6 + T7 + R1 + R2 + R3 + R4 + R5 + R6 + R7,
+    glm_fin <- MASS::stepAIC(glm(CASES ~ 1, data = df, ...),
+                             scope = CASES ~ T3 + T4 + T5 + T6 + T7 + T8 + R3 + R4 + R5 + R6 + R7 + R8,
                              direction = "forward")
   }
   return(glm_fin)

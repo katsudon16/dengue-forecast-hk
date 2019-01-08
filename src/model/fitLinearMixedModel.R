@@ -8,20 +8,21 @@ source("../lib/retrieveData.R")
 ## temperatureField: "mean", "absMin", "absMax"
 temperatureField <- "mean"
 ## temperatureType: "mean", "max", "min"
-temperatureType <- "max" 
+temperatureType <- "min" 
 ## rainfallType: "total", "max"
 rainfallType <- "max"
 minYear <- 2002
 maxYear <- 2018
 # if formula is specified, stepAIC will be skipped
+# formula <- RISK ~ T3 + T5 + T6 + R4 + R5 + (1 | AREA)
 formula <- NULL
 family <- poisson # poisson or nbinom2
 areas <- c("NTS", "NTN", "HKL")
-predictType <- "link"
+predictType <- "response"
 useAICc <- TRUE
 # if showTruePrediction = TRUE, show model prediction result,
 #   else, show cross validation prediction results
-showTruePrediction <- TRUE
+showTruePrediction <- FALSE
 #---------------------------------
 
 temperatureColLabels <- c(
@@ -56,20 +57,18 @@ for (year in minYear:maxYear) {
     T <- 0
     R <- 0
     risk <- areaRisk[areaRisk$year == year, area]
-    for (month in 2:8) {
+    for (month in 1:8) {
       T[month] <- Tdata[Tdata$month==month & Tdata$year==year, "temperature"]
       R[month] <- Rdata[Rdata$month==month & Rdata$year==year, "rainfall"]
     }
     # missing data result in -Inf
     if (length(R[!is.finite(R)]) > 0) next
-    df <- rbind(df, c(area_i, year, risk, T[-1], R[-1]))
+    df <- rbind(df, c(area_i, year, risk, T, R))
   }
 }
 names(df) <- c("AREA", "YEAR", "RISK",
-               "T2", "T3", "T4", "T5",
-               "T6", "T7", "T8",
-               "R2", "R3", "R4", "R5",
-               "R6", "R7", "R8")
+               "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8",
+               "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8")
 df$AREA <- as.factor(df$AREA)
 rm(Rdata, Tdata, data, areaRisk, areasR, areasT)
 
@@ -83,13 +82,13 @@ source("../lib/stepAIC_custom.R")
 if (is.null(formula)) {
   res <- stepAIC(df, model=glmmTMB,
                  responseVar="RISK",
-                 explanatoryVars=c("T2", "T3", "T4", "T5", "T6", "T7", "T8",
-                                   "R2", "R3", "R4", "R5", "R6", "R7", "R8"),
+                 explanatoryVars=c("T3", "T4", "T5", "T6", "T7", "T8",
+                                   "R3", "R4", "R5", "R6", "R7", "R8"),
                  randomFormula="(1 | AREA)",
                  isAICc=useAICc,
                  family=family)
 } else {
-  res <- glmmTMB(formula, data=df)
+  res <- glmmTMB(formula, data=df, family=family, REML=TRUE)
 }
 
 pred <- NULL
