@@ -8,7 +8,7 @@
 # - formula        : model formula. If not specified, model$formula is used
 # - the rest is parameters for predict function
 # returns prediction result data frame with the resDfCols columns and PRED
-leaveOneOut <- function(df, yLabel, model, modelType=glm, resDfCols=c(), predictType="link", formula=NULL,  ...) {
+leaveOneOut <- function(df, yLabel, model, modelType=glm, resDfCols=c(), predictType="link", formula=NULL, returnPred=TRUE, ...) {
   time1 <- Sys.time()
   sampleLength <- dim(df)[1]
   y_actual <- df[[yLabel]]
@@ -26,7 +26,14 @@ leaveOneOut <- function(df, yLabel, model, modelType=glm, resDfCols=c(), predict
   print(Sys.time() - time1)
   for (i in 1:sampleLength) {
     model_i <- modelType(formula, data=df[-i,], ...)
-    loo_pred[i] <- max(round(predict(model_i, newdata=df[i,], type=predictType)), 0)
+    # hack around glmmLasso bug when only 1 row is given
+    if (i == sampleLength) {
+      tempPred <- round(predict(model_i, newdata=df[(i-1):i,], type=predictType))
+      loo_pred[i] <- tempPred[2]
+    } else {
+      tempPred <- round(predict(model_i, newdata=df[i:(i+1),], type=predictType))
+      loo_pred[i] <- tempPred[1]
+    }
     row <- c()
     for (j in 1:length(resDfCols)) {
       row[j] <- df[i, resDfCols[j]]
@@ -48,9 +55,12 @@ leaveOneOut <- function(df, yLabel, model, modelType=glm, resDfCols=c(), predict
   loo_mse <- mean((y_actual - loo_pred) ^ 2)
   MSE_Va <- loo_mse
   
-  MSE_Ratio <- MSE_Tr/MSE_Va
-  print(MSE_Tr)
   print(MSE_Va)
-  print(MSE_Ratio)
-  return(pred_df)
+  print(MSE_Tr)
+  
+  MSE_Ratio <- MSE_Tr/MSE_Va
+  if (returnPred)
+    pred_df
+  else
+    list(mse_train=MSE_Tr, mse_valid=MSE_Va, mse_ratio=MSE_Ratio)
 }

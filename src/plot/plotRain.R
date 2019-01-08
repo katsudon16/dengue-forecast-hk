@@ -11,10 +11,10 @@ outputPlotHeight <- 3
 ## choose one location from: (the code will automatically detect district/area)
 # districts: "SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK"
 # areas    : "NTN", "NTS", "KL", "HK", "HKL"
-locations <- c("NTN", "NTS", "HKL")
+locations <- c("NTS", "NTN", "HKL")
 ## aggregate type, could be "max" or "sum"
 aggregateType <- "max"
-fieldPlotLabel <- "Max Daily Rain (mm)"
+fieldPlotLabel <- "Monthly Maximum Rain (mm)"
 gridRowNum <- 1 # number of grid rows
 #---------------------------------
 # plot's y axis limit
@@ -23,7 +23,7 @@ plotYmin <- 1000
 
 grids <- c()
 allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
-allAreas <- c("NTN", "NTS", "KL", "HK", "HKL")
+allAreas <- c("NTN", "NTS", "KL", "HK", "HKL", "ALL")
 jitter <- position_jitter(width=0.25, height=0)
 
 for (loc in locations) {

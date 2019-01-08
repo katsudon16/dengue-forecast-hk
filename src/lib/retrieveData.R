@@ -8,7 +8,7 @@ getAnnualRelativeRisk <- function(filePath="../../dat/cases/hk_monthly_cases.csv
   names(allCases)[2] <- "year"
   names(allCases)[3] <- "localCases"
   allCases$relativeRisk <- 0
-  
+
   avgCases <- 0
   minYear <- min(allCases$year, na.rm=TRUE)
   maxYear <- max(allCases$year, na.rm=TRUE)
@@ -121,4 +121,59 @@ extractSeasonalData <- function(dataset, field="totalrain", isPreseason=TRUE) {
   lg <- lm(formula=lgFormula, data=temp)
   seasonData$grad <- lg$coefficients[2]
   return(seasonData)
+}
+
+# extract climate data frame in form of monthly temperature, rainfall, and annual cases table
+# @params:
+# - temperatureField (the selected temperature column): "mean", "absMin", or "absMax"
+# - temperatureType (the temperature aggregate type)  : "mean', "max", or "min"
+# - rainfallType (the rainfall aggregate type)        : "total" or "max"
+# - areas (areas selected for the model), default=c() : e.g., c("HKL", "NTS", "NTN) 
+extractAnnualClimateData <- function (temperatureField="mean", temperatureType="mean", rainfallType="total", areas=c()) {
+  temperatureColLabels <- c(
+    mean="Daily.Mean.Temperature",
+    absMax="Absolute.Daily.Max.Temperature",
+    absMin="Absolute.Daily.Min.Temperature"
+  )
+  temperatureColLabel <- temperatureColLabels[temperatureField]
+  rainfallColLabel <- "Total.Rainfall.(mm)"
+  climateFile <- "../../dat/climate/HKCD_areas.xlsx"
+
+  areaRisk <- getAnnualRiskByArea()
+
+  areasT <- list()
+  areasR <- list()
+  for (area in areas) {
+    data <- readDFFromFile(area, filePath=climateFile)
+    areasT[[area]] <- getMonthlyTemperatureOnType(type=temperatureType,
+                                                  colName=temperatureColLabel,
+                                                  df=data)
+    areasR[[area]] <- getMonthlyRainfallOnType(type=rainfallType,
+                                               location=area,
+                                               df=data)
+  }
+
+  df <- data.frame()
+  for (year in minYear:maxYear) {
+    for (area_i in 1:length(areas)) {
+      area <- areas[area_i]
+      Tdata <- areasT[[area]]
+      Rdata <- areasR[[area]]
+      T <- 0
+      R <- 0
+      risk <- areaRisk[areaRisk$year == year, area]
+      for (month in 1:8) {
+        T[month] <- Tdata[Tdata$month==month & Tdata$year==year, "temperature"]
+        R[month] <- Rdata[Rdata$month==month & Rdata$year==year, "rainfall"]
+      }
+      # missing data result in -Inf
+      if (length(R[!is.finite(R)]) > 0) next
+      df <- rbind(df, c(area_i, year, risk, T, R))
+    }
+  }
+  names(df) <- c("AREA", "YEAR", "RISK",
+                 "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8",
+                 "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8")
+  df$AREA <- as.factor(df$AREA)
+  return(df)
 }

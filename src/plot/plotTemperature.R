@@ -10,14 +10,14 @@ outputPlotWidth <- 12
 outputPlotHeight <- 3
 ## choose temperature field between "absMin", "mean", "absMax"
 field <- "mean"
-fieldPlotLabel <- "Max Daily Mean Temperature (°C)"
+fieldPlotLabel <- "Monthly Mean Temperature (°C)"
 ## aggregate type, could be "min", "mean", "max", or "sum"
-aggregateType <- "max"
+aggregateType <- "mean"
 ## choose a list of location from: (the code will automatically detect district/area)
  # districts: "SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK"
  # areas    : "NTN", "NTS", "KL", "HK", "HKL"
  # the plots will be divided into grids
-locations <- c("NTN", "NTS", "HKL")
+locations <- c("NTS", "NTN", "HKL")
 gridRowNum <- 1 # number of grid rows
 #---------------------------------
 
@@ -27,7 +27,7 @@ plotYmin <- 1000
 
 grids <- c()
 allDistricts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
-allAreas <- c("NTS", "NTN", "KL", "HK", "HKL")
+allAreas <- c("NTS", "NTN", "KL", "HK", "HKL", "ALL")
 
 fieldLabels <- list(absMax="Absolute.Daily.Max.Temperature",
                     mean="Daily.Mean.Temperature",
