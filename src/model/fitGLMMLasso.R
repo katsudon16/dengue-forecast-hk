@@ -14,11 +14,13 @@ rainfallType <- "max"
 minYear <- 2002
 maxYear <- 2018
 # if formula is specified, stepAIC will be skipped
-# formula <- RISK ~ T3 + T5 + T6 + R4 + R5 + (1 | AREA)
-formula <- NULL
-family <- poisson # poisson or nbinom2
+# formula <- RISK ~ (1 | AREA)
+formula <- RISK ~ (1 + R5| AREA) + T3 + T5 + T6 + T7 + T8 + R4 + R5 + R6
+
+family <- poisson() # e.g., poisson()
 areas <- c("NTS", "NTN", "HKL")
 predictType <- "response"
+lambda <- 5
 useAICc <- TRUE
 # if showTruePrediction = TRUE, show model prediction result,
 #   else, show cross validation prediction results
@@ -72,15 +74,24 @@ names(df) <- c("AREA", "YEAR", "RISK",
 df$AREA <- as.factor(df$AREA)
 rm(Rdata, Tdata, data, areaRisk, areasR, areasT)
 
+if (!require("glmmLasso")) install.packages("glmmLasso")
 if (!require("glmmTMB")) install.packages("glmmTMB")
-source("../lib/stepAIC_LMM.R")
+if (!require("lme4")) install.packages("lme4")
 
 if (is.null(formula)) {
-  res <- stepAICMM(glmmTMB(RISK ~ (1 | AREA), data=df, family=poisson),
-                     scope=RISK ~ T3 + T4 + T5 + T6 + T7 + T8 + R3 + R4 + R5 + R6 + R7 + R8,
-                     direction="forward", useAICc=TRUE)
+  minBIC <- 10000
+  res <- NULL
+  resLambda <- NULL
+  for (lambda in 51:60) {
+    print(lambda)
+    temp <- glmmLasso(RISK ~ T3 + T4 + T5 + T6 + T7 + T8 + R3 + R4 + R5 + R6 + R7 + R8,
+                     rnd=list(AREA=~1 + R5), lambda=lambda,
+                     data=df, family=family)
+    print(summary(temp))
+  }
 } else {
   res <- glmmTMB(formula, data=df, family=family, REML=TRUE)
+  # res <- glmer(formula, data=df, family=family, method="REML")
 }
 
 pred <- NULL
@@ -139,3 +150,9 @@ for (area_i in areas) {
          lty=1:2, cex=0.8)
   invisible(readline(prompt="Press [enter] to continue"))
 }
+print("BIC")
+print(BIC(res))
+print("AIC")
+print(AIC(res))
+print("AICc")
+print(AICc(res))

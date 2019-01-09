@@ -1,4 +1,5 @@
-stepAIC <- function (object, scope, scale = 0,
+# Modified stepAIC function from MASS package to enable glmmTMB formula
+stepAICMM <- function (object, scope, scale = 0,
                      direction = c("both", "backward", "forward"),
                      trace = 1, keep = NULL, steps = 1000, use.start = FALSE, 
                      k = 2, useAICc=FALSE, ...) {
