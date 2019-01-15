@@ -15,8 +15,7 @@ minYear <- 2002
 maxYear <- 2018
 # if formula is specified, stepAIC will be skipped
 # formula <- RISK ~ (1 | AREA)
-formula <- RISK ~ (1 + R5| AREA) + T3 + T5 + T6 + T7 + T8 + R4 + R5 + R6
-
+formula <- RISK ~ (1 + R5| AREA)
 family <- poisson() # e.g., poisson()
 areas <- c("NTS", "NTN", "HKL")
 predictType <- "response"

@@ -54,8 +54,10 @@ leaveOneOut <- function(df, yLabel, model, modelType=glm, resDfCols=c(), predict
   ## MSE for validating set
   loo_mse <- mean((y_actual - loo_pred) ^ 2)
   MSE_Va <- loo_mse
-  
   MSE_Ratio <- MSE_Tr/MSE_Va
+  print(MSE_Tr)
+  print(MSE_Va)
+  print(MSE_Ratio)
   if (returnPred)
     pred_df
   else
