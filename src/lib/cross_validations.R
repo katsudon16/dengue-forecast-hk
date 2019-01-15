@@ -40,8 +40,9 @@ leaveOneOut <- function(df, yLabel, model, modelType=glm, resDfCols=c(), predict
     }
     row[length(resDfCols) + 1] <- loo_pred[i]
     pred_df <- rbind(pred_df, row)
-    fitting <- max(round(fitted(model_i)), 0)
-    loo_fitted[-i, i] <- fitting # fitting row
+    fitting <- round(fitted(model_i))
+    print(fitting)
+    loo_fitted[i, -i] <- fitting # fitting row
     loo_fitted[i,i] <- loo_pred[i] # predicting row
     loo_train_mse[i] <- mean((df[[yLabel]][-i] - fitted(model_i)) ^ 2)
   }
@@ -59,6 +60,7 @@ leaveOneOut <- function(df, yLabel, model, modelType=glm, resDfCols=c(), predict
   print(MSE_Tr)
   
   MSE_Ratio <- MSE_Tr/MSE_Va
+  return(loo_fitted)
   if (returnPred)
     pred_df
   else

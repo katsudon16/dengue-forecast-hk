@@ -5,16 +5,16 @@ if (!require(gridExtra)) install.packages("gridExtra")
 
 #---------USER INPUTS-------------
 shouldOutputFigure <- TRUE
-outputFile <- "../../figure/area_rain.tiff"
-outputPlotWidth <- 12
+outputFile <- "../../figure/area_rain_all_total.tiff"
+outputPlotWidth <- 4
 outputPlotHeight <- 3
 ## choose one location from: (the code will automatically detect district/area)
 # districts: "SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK"
 # areas    : "NTN", "NTS", "KL", "HK", "HKL"
-locations <- c("NTS", "NTN", "HKL")
+locations <- c("ALL")
 ## aggregate type, could be "max" or "sum"
-aggregateType <- "max"
-fieldPlotLabel <- "Monthly Maximum Rain (mm)"
+aggregateType <- "sum"
+fieldPlotLabel <- "Monthly Total Rain (mm)"
 gridRowNum <- 1 # number of grid rows
 #---------------------------------
 # plot's y axis limit

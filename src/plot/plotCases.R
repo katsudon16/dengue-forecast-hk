@@ -1,7 +1,7 @@
 rm(list=ls(all=TRUE))
 
 outputFile <- "../../figure/local_cases.tiff"
-shouldOutputFigure <- FALSE
+shouldOutputFigure <- T
 
 # modify if needed
 plotField <- "Local.Cases"
@@ -44,16 +44,18 @@ if (shouldOutputFigure) {
 }
 
 # 3. draw plot
-ggplot() +
+ggplot(data=extracted, aes(Month, get(plotField))) +
   # monthly average
-  geom_line(data=monthAvg, aes(x=Month, y=get(plotField), group=1), colour="blue") +
+  # geom_line(data=monthAvg, aes(x=Month, y=get(plotField), group=1), colour="blue") +
   # extracted from cases
-  geom_point(data=extracted, aes(Month, get(plotField), colour=factor(Year)), alpha=0.6, size=2) +
+  geom_col(aes(fill=factor(Year))) +
   scale_x_discrete(limits=month.abb[1:12]) +
-  scale_color_manual(values=c("#000000", "#0000FF",
-                              "#7D3C98", "#FF0000",
-                              "#27AE60", "#FF00FF",
-                              "#F1C40F", "#5DADE2")) +
-  labs(color="Years") + 
+  scale_y_continuous(breaks=seq(0, 30, 2), limits=c(0, 30)) +
+  scale_fill_brewer(palette="Set1") +
+  # scale_color_manual(values=c("#FFFFFF", "#0000FF",
+  #                             "#7D3C98", "#FF0000",
+  #                             "#27AE60", "#FF00FF",
+  #                             "#F1C40F", "#5DADE2")) +
+  labs(fill="Years") + 
   labs(x="Month") +
   labs(y=plotFieldLabel)

@@ -146,6 +146,7 @@ stepAICc_any <- function (object, scope, scale=0, skipTerm=F,
       }
     }
     if (is.null(change)) {
+      print(scope$add)
       if (forward && length(scope$add)) {
         aodf <- addterm(fit, scope$add, scale = scale,
                         trace = max(0, trace - 1), k = k, ...)
@@ -210,7 +211,7 @@ stepAICc_any <- function (object, scope, scale=0, skipTerm=F,
 stepAICc <- function (object, scope, scale=0,
                       direction=c("both", "backward", "forward"),
                       trace=1, keep=NULL, steps=1000, use.start=FALSE,
-                      k=2, useAICc=FALSE, ...) {
+                      k=2, useAICc=T, ...) {
   stepAICc_any(object, scope, scale=0, skipTerm=F, direction=direction, trace=trace,
               keep=keep, steps=steps, use.start=use.start, k=k, useAICc=useAICc, ...)
 }
@@ -218,7 +219,7 @@ stepAICc <- function (object, scope, scale=0,
 stepAICc_MM <- function (object, scope, scale=0,
                       direction=c("both", "backward", "forward"),
                       trace=1, keep=NULL, steps=1000, use.start=FALSE,
-                      k=2, useAICc=FALSE, ...) {
+                      k=2, useAICc=T, ...) {
   stepAICc_any(object, scope, scale=0, skipTerm=T, direction=direction, trace=trace,
               keep=keep, steps=steps, use.start=use.start, k=k, useAICc=useAICc, ...)
 }
