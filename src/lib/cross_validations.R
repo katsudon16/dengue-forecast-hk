@@ -60,7 +60,6 @@ leaveOneOut <- function(df, yLabel, model, modelType=glm, resDfCols=c(), predict
   print(MSE_Tr)
   
   MSE_Ratio <- MSE_Tr/MSE_Va
-  return(loo_fitted)
   if (returnPred)
     pred_df
   else
