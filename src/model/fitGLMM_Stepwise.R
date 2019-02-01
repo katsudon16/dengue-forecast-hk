@@ -11,11 +11,11 @@ temperatureField <- "mean"
 ## temperatureType: "mean", "max", "min"
 temperatureType <- "mean" 
 ## rainfallType: "total", "max"
-rainfallType <- "total"
+rainfallType <- "max"
 minYear <- 2002
 maxYear <- 2018
 # if formula is specified, stepAICc will be skipped
-formula <- RISK ~ (1 | AREA) + T3 + T4 + T5 + T7 + R4 + R5 + R6
+formula <- RISK ~ (1 | AREA) + T3 + T4 + T5 + T6 + T7 + R3 + R4 + R5 + R6
 family <- poisson # poisson or nbinom2
 areas <- c("NTS", "NTN", "HKL")
 predictType <- "response"
@@ -42,11 +42,12 @@ if (is.null(formula)) {
 } else {
   res <- glmmTMB(formula, data=df, family=family, REML=T, se=TRUE)
 }
+
 # library("sjPlot")
 # plot_model(res, type = "eff", terms = "T7")
-summary(res)
-AICc(res)
-exit()
+
+# summary(res)
+# AICc(res)
 # BIC(res)
 
 pred <- NULL
@@ -62,8 +63,6 @@ if (showTruePrediction) {
                       formula=formula(res), family=family,
                       predictType=predictType)
 }
-
-exit()
 
 if (!"ALL" %in% areas) {
   areas <- c("ALL", areas)

@@ -2,7 +2,7 @@ rm(list=ls(all=TRUE))
 source("../lib/retrieveData.R")
 
 #---------USER INPUTS-------------
-shouldOutputFigure <- T
+shouldOutputFigure <- F
 outputFile <- "../../figure/case_by_location.tiff"
 outputPlotWidth <- 4
 outputPlotHeight <- 4
