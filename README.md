@@ -18,12 +18,10 @@
 
 ## Data description
 
-In this project, we temporarily divide HK into 5 areas:
-- New Territories West (NTW)
-- New Territories East (NTE)
-- New Territories South (NTS)
-- Kowloon (KL)
-- Hong Kong (HK)
+In this project, we temporarily divide HK into 3 areas:
+- New Territories North (NTN): all districts in the northern island except for Kowloon and Kwai Tsing
+- New Territories South (NTS): the southern island of New Territories
+- Hong Kong and Kowloon (HKL): Hong Kong, Kowloon, and Kwai Tsing
 
 
 ```
