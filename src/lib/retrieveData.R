@@ -129,7 +129,9 @@ extractSeasonalData <- function(dataset, field="totalrain", isPreseason=TRUE) {
 # - temperatureType (the temperature aggregate type)  : "mean', "max", or "min"
 # - rainfallType (the rainfall aggregate type)        : "total" or "max"
 # - areas (areas selected for the model), default=c() : e.g., c("HKL", "NTS", "NTN) 
-extractAnnualClimateData <- function (temperatureField="mean", temperatureType="mean", rainfallType="total", areas=c()) {
+extractAnnualClimateData <- function (temperatureField="mean", temperatureType="mean",
+                                      rainfallType="total",
+                                      areas=c(), minYear=2002, maxYear=2018) {
   temperatureColLabels <- c(
     mean="Daily.Mean.Temperature",
     absMax="Absolute.Daily.Max.Temperature",

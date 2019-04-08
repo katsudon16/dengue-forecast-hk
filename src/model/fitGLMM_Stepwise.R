@@ -11,11 +11,12 @@ temperatureField <- "mean"
 ## temperatureType: "mean", "max", "min"
 temperatureType <- "mean" 
 ## rainfallType: "total", "max"
-rainfallType <- "max"
+rainfallType <- "total"
 minYear <- 2002
 maxYear <- 2018
 # if formula is specified, stepAICc will be skipped
-formula <- RISK ~ (1 | AREA) + T3 + T4 + T5 + T6 + T7 + R3 + R4 + R5 + R6
+formula <- RISK ~ (1 | AREA) + T3 + T4 + T5 + T7 + R4 + R5 + R6
+# formula <- NULL
 family <- poisson # poisson or nbinom2
 areas <- c("NTS", "NTN", "HKL")
 predictType <- "response"
@@ -25,14 +26,25 @@ useAICc <- TRUE
 showTruePrediction <- FALSE
 #---------------------------------
 source("../lib/retrieveData.R")
-df <- extractAnnualClimateData(temperatureField, temperatureType, rainfallType, areas)
+df <- extractAnnualClimateData(temperatureField, temperatureType, rainfallType,
+                               areas, minYear=minYear, maxYear=maxYear)
+
+library(pracma)
+findNRMSE <- function(val) {
+    return (nthroot(val, 2) / 19)
+}
 
 maxs <- apply(df[,c(4:19)], 2, max)
 mins <- apply(df[,c(4:19)], 2, min)
 df[,c(4:19)] <- scale(df[,c(4:19)], center = mins, scale = maxs - mins)
 
+mean_cases <- mean(df$RISK)
+# df$RISK <- df$RISK / mean_cases
+
+
 if (!require("glmmTMB")) install.packages("glmmTMB")
 library("glmmTMB")
+library("MASS")
 source("../lib/stepAICc.R")
 
 if (is.null(formula)) {
@@ -43,14 +55,28 @@ if (is.null(formula)) {
   res <- glmmTMB(formula, data=df, family=family, REML=T, se=TRUE)
 }
 
+# p <- ggpredict(res, c("R4"))
+# p$predicted <- p$predicted / mean_cases
+# p$std.error <- p$std.error / nthroot(mean_cases, 2)
+# p$conf.low <- p$conf.low / mean_cases
+# p$conf.high <- p$conf.high / mean_cases
+
+# p <- plot(p) + labs(x = "R4 (mm)", y="Relative Risk", title="")
+# ggsave("../../marginal_effect_R4.tiff", units="in", width=5, height=4.2, dpi=300, compression = "lzw")
+
+
 # library("sjPlot")
-# plot_model(res, type = "eff", terms = "T7")
+# plot_model(res, type = "pred", terms = "T7")
+
+exit()
 
 # summary(res)
 # AICc(res)
 # BIC(res)
 
 pred <- NULL
+minYear <- 2003
+df <- df[df$YEAR != 2002,]
 if (showTruePrediction) {
   pred <- df[c("AREA", "YEAR", "RISK")]
   pred$PRED <- round(predict(res, newdata=df, type=predictType))
@@ -64,11 +90,13 @@ if (showTruePrediction) {
                       predictType=predictType)
 }
 
+exit()
+
 if (!"ALL" %in% areas) {
   areas <- c("ALL", areas)
 }
 
-pred$PRED <- round(fitted(res))
+# pred$PRED <- round(fitted(res))
 
 byyear <- list()
 for (area_i in areas) {
