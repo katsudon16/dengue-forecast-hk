@@ -4,8 +4,8 @@ if (!require(ggplot2)) install.packages(ggplot2)
 if (!require(gridExtra)) install.packages("gridExtra")
 
 #---------USER INPUTS-------------
-shouldOutputFigure <- TRUE
-outputFile <- "../../figure/area_rain_all_total.tiff"
+shouldOutputFigure <- T
+outputFile <- "../../figure/area_rain_all_max.tiff"
 outputPlotWidth <- 4
 outputPlotHeight <- 3
 ## choose one location from: (the code will automatically detect district/area)
@@ -13,8 +13,8 @@ outputPlotHeight <- 3
 # areas    : "NTN", "NTS", "KL", "HK", "HKL"
 locations <- c("ALL")
 ## aggregate type, could be "max" or "sum"
-aggregateType <- "sum"
-fieldPlotLabel <- "Monthly Total Rain (mm)"
+aggregateType <- "max"
+fieldPlotLabel <- "Monthly Total Rainfall (mm)"
 gridRowNum <- 1 # number of grid rows
 #---------------------------------
 # plot's y axis limit
@@ -51,11 +51,17 @@ for (loc in locations) {
     ylim(plotYmin, plotYmax) +
     ggtitle(loc) +
     geom_boxplot(aes(month_txt, Rain), outlier.shape=NA) +
-    geom_point(aes(colour=cut(Year, c(2001, 2002, 2017, 2018))), alpha=0.5, position=jitter, size=1) +
+    geom_point(aes(colour=cut(Year, c(2001, 2002, 2017, 2018)),
+                   size=cut(Year, c(2001, 2002, 2017, 2018))),
+               alpha=0.5,
+               position=jitter) +
     scale_color_manual(name = "Years",
-                       values = c("(2001,2002]" = "Green",
+                       values = c("(2001,2002]" = "green4",
                                   "(2002,2017]" = "Black",
                                   "(2017,2018]" = "Red"),
+                       labels = c("2002", "2003-2017", "2018")) +
+    scale_size_manual(name = "Years",
+                      values = c(2, 1, 2),
                        labels = c("2002", "2003-2017", "2018")) +
     scale_x_discrete(limits=month.abb[1:8]) +
     labs(x = "Month") +

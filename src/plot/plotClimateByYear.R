@@ -1,22 +1,32 @@
 rm(list=ls(all=TRUE))
 
 #---------USER INPUTS-------------
-saveToFile <- T
-outputFile <- "../../figure/compare_rain_mid.tiff"
+saveToFile <- F
+outputFile <- "../../figure/normalized_temp_years.tiff"
 ## temperatureField: "mean", "absMin", "absMax"
 temperatureField <- "mean"
 ## temperatureType: "mean", "max", "min"
 temperatureType <- "mean" 
 ## rainfallType: "total", "max"
 rainfallType <- "total"
-minYear <- 2003
-maxYear <- 2017
+minYear <- 2002
+maxYear <- 2018
+# area option = 1 -> NTS, 2 -> NTN, 3 -> HKL
 areas <- c("NTS", "NTN", "HKL")
 showTemperature <- T
+# boxplot --> 2002 >< 2003 - 2017 >< 2018
+# line    -->         2003 - 2017 >< 2018
+plotBoxplot <- T
+outputPlotWidth <- 12
+outputPlotHeight <- 3
+gridRowNum <- 1 # number of grid rows
+fieldPlotLabel <- "The Normalized Ratio of\nMonthly Mean Temperature"
+# fieldPlotLabel <- "The Normalized Ratio of\nMonthly Total Rainfall"
 #---------------------------------
 source("../lib/retrieveData.R")
 df <- extractAnnualClimateData(temperatureField, temperatureType, rainfallType, areas)
 
+# normalized
 maxs <- apply(df[,c(4:19)], 2, max)
 mins <- apply(df[,c(4:19)], 2, min)
 df[,c(4:19)] <- scale(df[,c(4:19)], center = mins, scale = maxs - mins)
@@ -32,23 +42,66 @@ for (area in 1:length(areas)) {
     }
   }
 }
-names(plot_df) <- c("area", "year", "month", "value")
-plot_df <- aggregate(plot_df$value, list(plot_df$area, plot_df$month), FUN=mean, na.rm=TRUE)
-names(plot_df) <- c("area", "month", "value")
-plot_df$year <- "other"
-plot_df$area <- areas[plot_df$area]
+names(plot_df) <- c("area", "Year", "Month", "value")
+plotYmax <- max(plot_df$value)
+plotYmin <- min(plot_df$value)
+plot_df$month_txt <- month.abb[plot_df$Month]
 
-g <- ggplot(data=plot_df, aes(x=month, y=value, group=area)) +
-  geom_line(aes(color=area), size=1.2) +
-  scale_fill_brewer(palette="Set1") +
-  theme(legend.title=element_blank()) +
-  ylim(0, 1) + 
-  labs(x="Month") +
-  labs(y="Normalized Total Rainfall")
-
+grids <- c()
+jitter <- position_jitter(width=0.25, height=0)
+commands <- ifelse(saveToFile, "arrangeGrob(", "grid.arrange(")
+for (area_i in 1:length(areas)) {
+  areaName <- areas[area_i]
+  if (plotBoxplot) {
+    grids[[areaName]] <- ggplot(data=plot_df[plot_df$area == area_i,], aes(x=month_txt,y=value)) +
+      ylim(plotYmin, plotYmax) +
+      ggtitle(areaName) +
+      geom_boxplot(aes(month_txt, value), outlier.shape = NA) +
+      geom_point(aes(colour = cut(Year, c(2001, 2002, 2017, 2018)),
+                     size=cut(Year, c(2001, 2002, 2017, 2018))),
+                 position=jitter, alpha=0.5) +
+      scale_color_manual(name = "Years",
+                         values = c("(2001,2002]" = "green4",
+                                    "(2002,2017]" = "Black",
+                                    "(2017,2018]" = "Red"),
+                         labels = c("2002", "2003-2017", "2018")) +
+      scale_size_manual(name = "Years",
+                        values = c(2, 1, 2),
+                        labels = c("2002", "2003-2017", "2018")) + 
+      scale_x_discrete(limits=month.abb[3:8]) +
+      labs(x = "Month") +
+      labs(y = fieldPlotLabel)
+  } else {
+    area_df <- plot_df[plot_df$area == area_i,]
+    # aggregate 2003 - 2017
+    temp_df <- area_df[area_df$Year > 2002 & area_df$Year < 2018,]
+    temp_df <- aggregate(temp_df$value, list(temp_df$Month), FUN=mean, na.rm=T)
+    names(temp_df) <- c("Month", "value")
+    temp_df$Year <- "Other"
+    last_df <- area_df[area_df$Year == 2018,]
+    area_df <- temp_df
+    for (month in 3:8) {
+      row <- last_df[last_df$Month == month,]
+      area_df <- rbind(area_df, c(row$Month, row$value, row$Year))
+    }
+    
+    grids[[areaName]] <- ggplot(data=area_df, aes(x=Month, y=value, group=Year)) +
+      ggtitle(areaName) +
+      geom_line(aes(color=Year), size=1.2) +
+      scale_fill_brewer(palette="Set1") +
+      theme(legend.title=element_blank()) +
+      ylim(0, 1) + 
+      labs(x="Month") +
+      labs(y=fieldPlotLabel)
+    
+  }
+  commands <- paste(commands, "grids$", areas[area_i], ", ", sep="")
+}
+commands <- paste(commands, "nrow=", gridRowNum, ")", sep="")
+g <- eval(parse(text=commands))
 if (saveToFile) {
-  ggsave(outputFile, g, units="in", width=5,
-         height=4, dpi=300, compression = "lzw")
+  ggsave(outputFile, g, units="in", width=outputPlotWidth,
+         height=outputPlotHeight, dpi=300, compression = "lzw")
 } else {
   g
 }

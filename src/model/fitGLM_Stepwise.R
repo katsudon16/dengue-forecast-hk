@@ -37,7 +37,7 @@ if (is.null(formula)) {
 } else {
   res <- glm(formula, data=df, family=family)
 }
-
+exit()
 pred <- NULL
 if (showTruePrediction) {
   pred <- df[c("AREA", "YEAR", "RISK")]

@@ -28,6 +28,7 @@ for (i in 1:dim(daily)[1]) {
 names(dailydf) <- c("Year", "Month", "Day", "rainfall")
 write.xlsx(dailydf, excelFile, append=TRUE)
 
+exit()
 
 # monthly data
 excelFile <- "../../dat/climate/HKCD_test.xlsx"

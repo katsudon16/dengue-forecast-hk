@@ -7,7 +7,7 @@ library("crayon")
 
 #---------USER INPUTS-------------
 # districts <- c("SLW", "TY", "TKL", "SK", "ST", "TP", "TM", "YL", "CC", "TC", "HK")
-districts <- c("KP", "HK") # to be merged
+districts <- c("TKL", "ST", "TP", "TM", "YL", "SK", "TY") # to be merged
 # output file
 excelFile <- "d:/workspace/dengue-forecast-hk/dat/climate/HKCD_test.xlsx"
 sheetName <- "HK"
