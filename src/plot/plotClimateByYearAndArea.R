@@ -1,8 +1,13 @@
 rm(list=ls(all=TRUE))
+if (!require(openxlsx)) install.packages("openxlsx")
+if (!require(gridExtra)) install.packages("gridExtra")
 
 #---------USER INPUTS-------------
-saveToFile <- F
+shouldOutputFigure <- F
 outputFile <- "../../figure/compare_temp_2018.tiff"
+outputPlotWidth <- 5
+outputPlotHeight <- 4
+showTemperature <- T
 ## temperatureField: "mean", "absMin", "absMax"
 temperatureField <- "mean"
 ## temperatureType: "mean", "max", "min"
@@ -11,11 +16,11 @@ temperatureType <- "mean"
 rainfallType <- "total"
 minYear <- 2018
 maxYear <- 2018
-areas <- c("NTS", "NTN", "HKL")
-showTemperature <- T
 ylab <- "The Normalized Mean Temperature\n(2018)"
 # ylab <- "The Normalized Total Rainfall\n(2018)"
 #---------------------------------
+
+areas <- c("NTS", "NTN", "HKL")
 source("../lib/retrieveData.R")
 df <- extractAnnualClimateData(temperatureField, temperatureType, rainfallType, areas)
 
@@ -48,9 +53,9 @@ g <- ggplot(data=plot_df, aes(x=month, y=value, group=area)) +
   labs(x="Month") +
   labs(y=ylab)
 
-if (saveToFile) {
-  ggsave(outputFile, g, units="in", width=5,
-         height=4, dpi=300, compression = "lzw")
+if (shouldOutputFigure) {
+  ggsave(outputFile, g, units="in", width=outputPlotWidth,
+         height=outputPlotHeight, dpi=300, compression = "lzw")
 } else {
   g
 }

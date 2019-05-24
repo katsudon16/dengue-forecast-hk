@@ -4,7 +4,7 @@ if (!require(ggplot2)) install.packages("ggplot2")
 if (!require(gridExtra)) install.packages("gridExtra")
 
 #---------USER INPUTS-------------
-shouldOutputFigure <- T
+shouldOutputFigure <- F
 outputFile <- "../../figure/area_all_temp_mean.tiff"
 outputPlotWidth <- 4
 outputPlotHeight <- 3

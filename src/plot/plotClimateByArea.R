@@ -1,40 +1,45 @@
 rm(list=ls(all=TRUE))
+if (!require(openxlsx)) install.packages("openxlsx")
+if (!require(ggplot2)) install.packages(ggplot2)
+if (!require(gridExtra)) install.packages("gridExtra")
 
 #---------USER INPUTS-------------
-saveToFile <- F
+shouldOutputFigure <- F
 outputFile <- "../../figure/normalized_temp_years.tiff"
+outputPlotWidth <- 12
+outputPlotHeight <- 3
+showTemperature <- T
 ## temperatureField: "mean", "absMin", "absMax"
 temperatureField <- "mean"
 ## temperatureType: "mean", "max", "min"
 temperatureType <- "mean" 
 ## rainfallType: "total", "max"
 rainfallType <- "total"
-minYear <- 2002
-maxYear <- 2018
+normalized <- T
 # area option = 1 -> NTS, 2 -> NTN, 3 -> HKL
-areas <- c("NTS", "NTN", "HKL")
-showTemperature <- T
+areas <- c("HKL")
+# areas <- c("NTS", "NTN", "HKL")
 # boxplot --> 2002 >< 2003 - 2017 >< 2018
 # line    -->         2003 - 2017 >< 2018
-plotBoxplot <- T
-outputPlotWidth <- 12
-outputPlotHeight <- 3
+plotBoxplot <- F
 gridRowNum <- 1 # number of grid rows
-fieldPlotLabel <- "The Normalized Ratio of\nMonthly Mean Temperature"
-# fieldPlotLabel <- "The Normalized Ratio of\nMonthly Total Rainfall"
+ylab <- "The Normalized Ratio of\nMonthly Mean Temperature"
+# ylab <- "The Normalized Ratio of\nMonthly Total Rainfall"
 #---------------------------------
 source("../lib/retrieveData.R")
 df <- extractAnnualClimateData(temperatureField, temperatureType, rainfallType, areas)
 
 # normalized
-maxs <- apply(df[,c(4:19)], 2, max)
-mins <- apply(df[,c(4:19)], 2, min)
-df[,c(4:19)] <- scale(df[,c(4:19)], center = mins, scale = maxs - mins)
+if (normalized) {
+  maxs <- apply(df[,c(4:19)], 2, max)
+  mins <- apply(df[,c(4:19)], 2, min)
+  df[,c(4:19)] <- scale(df[,c(4:19)], center = mins, scale = maxs - mins)
+}
 
 prefix <- ifelse(showTemperature, "T", "R")
 plot_df <- data.frame()
 for (area in 1:length(areas)) {
-  for (year in minYear:maxYear) {
+  for (year in 2002:2018) {
     row <- df[df$YEAR == year & df$AREA == area,]
     for (month in 3:8) {
       field <- paste(prefix, month, sep="")
@@ -49,7 +54,7 @@ plot_df$month_txt <- month.abb[plot_df$Month]
 
 grids <- c()
 jitter <- position_jitter(width=0.25, height=0)
-commands <- ifelse(saveToFile, "arrangeGrob(", "grid.arrange(")
+commands <- ifelse(shouldOutputFigure, "arrangeGrob(", "grid.arrange(")
 for (area_i in 1:length(areas)) {
   areaName <- areas[area_i]
   if (plotBoxplot) {
@@ -70,7 +75,7 @@ for (area_i in 1:length(areas)) {
                         labels = c("2002", "2003-2017", "2018")) + 
       scale_x_discrete(limits=month.abb[3:8]) +
       labs(x = "Month") +
-      labs(y = fieldPlotLabel)
+      labs(y = ylab)
   } else {
     area_df <- plot_df[plot_df$area == area_i,]
     # aggregate 2003 - 2017
@@ -92,14 +97,14 @@ for (area_i in 1:length(areas)) {
       theme(legend.title=element_blank()) +
       ylim(0, 1) + 
       labs(x="Month") +
-      labs(y=fieldPlotLabel)
+      labs(y=ylab)
     
   }
   commands <- paste(commands, "grids$", areas[area_i], ", ", sep="")
 }
 commands <- paste(commands, "nrow=", gridRowNum, ")", sep="")
 g <- eval(parse(text=commands))
-if (saveToFile) {
+if (shouldOutputFigure) {
   ggsave(outputFile, g, units="in", width=outputPlotWidth,
          height=outputPlotHeight, dpi=300, compression = "lzw")
 } else {

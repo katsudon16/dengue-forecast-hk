@@ -1,8 +1,10 @@
 rm(list=ls(all=TRUE))
 source("../lib/retrieveData.R")
+if (!require(openxlsx)) install.packages("openxlsx")
+if (!require(ggplot2)) install.packages("ggplot2")
 
 #---------USER INPUTS-------------
-shouldOutputFigure <- T
+shouldOutputFigure <- F
 outputFile <- "../../figure/case_by_location.tiff"
 outputPlotWidth <- 5
 outputPlotHeight <- 3

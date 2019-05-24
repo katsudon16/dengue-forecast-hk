@@ -1,15 +1,16 @@
 rm(list=ls(all=TRUE))
+if (!require(openxlsx)) install.packages("openxlsx")
+if (!require(ggplot2)) install.packages("ggplot2")
 
-outputFile <- "../../figure/local_cases.tiff"
+#---------USER INPUTS-------------
 shouldOutputFigure <- T
-
-# modify if needed
-plotField <- "Local.Cases"
+outputFile <- "../../figure/local_cases.tiff"
+outputPlotWidth <- 6
+outputPlotHeight <- 4.2
 plotFieldLabel <- "Local Cases"
+#---------------------------------
 
-# install if ggplot2 is not found
-if (!require(ggplot2)) install.packages(ggplot2)
-
+plotField <- "Local.Cases"
 cases <- read.csv("../../dat/cases/hk_monthly_cases.csv", header=T)
 # remove year (month) with no incidence
 cases <- cases[cases$Imported.Cases != cases$Total,]

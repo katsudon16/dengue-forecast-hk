@@ -30,7 +30,7 @@ write.xlsx(dailydf, excelFile, append=TRUE)
 
 exit()
 
-# monthly data
+# monthly data--------------------------------------------
 excelFile <- "../../dat/climate/HKCD_test.xlsx"
 monthly <- read.xlsx("../../dat/climate/HK_rainfall.xlsx",
                    sheet="Monthly",
