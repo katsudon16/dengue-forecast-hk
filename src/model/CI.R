@@ -1,10 +1,11 @@
-# Since it's randomized, check if the values are the same with the table!
-
 areas <- c("NTS", "NTN", "HKL")
-divideByArea <- T
-area <- 1
 
-mainTitle <- ifelse(divideByArea, areas[area], "All Areas")
+#---------USER INPUTS-------------
+divideByArea <- T
+area_i <- 1
+#---------------------------------
+
+mainTitle <- ifelse(divideByArea, areas[area_i], "All Areas")
 
 lambda <- round(fitted(res))
 n <- dim(df)[1]
@@ -32,7 +33,7 @@ if (divideByArea == T) {
   year <- 2002
   
   for (i in 0:(n/3 - 1)) {
-    row <- area + i*3
+    row <- area_i + i*3
     y_ci <- rbind(y_ci, c(observed[row], estimated[row], y_hat_lwr[row], y_hat_upr[row], year))
     year <- year + 1    
   }
@@ -60,12 +61,12 @@ if (divideByArea == T) {
   y_ci$year <- seq(2002, 2018, 1)
 }
 
-exit() # check y_ci first before continue
+exit() # check y_ci for consistency with the paper if needed
 
 library(plotrix)
 
 if (divideByArea) {
-  if (area == 3) {
+  if (area_i == 3) {
     # special case: HKL
     # modify for graph only (axis break)
     gapFrom <- 22

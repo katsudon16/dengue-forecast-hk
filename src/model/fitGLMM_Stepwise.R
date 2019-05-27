@@ -55,20 +55,18 @@ if (is.null(formula)) {
   res <- glmmTMB(formula, data=df, family=family, REML=T, se=TRUE)
 }
 
-# p <- ggpredict(res, c("R4"))
+# library("ggeffects")
+# marginalVar <- "R4"
+# p <- ggpredict(res, c(marginalVar))
 # p$predicted <- p$predicted / mean_cases
 # p$std.error <- p$std.error / nthroot(mean_cases, 2)
 # p$conf.low <- p$conf.low / mean_cases
 # p$conf.high <- p$conf.high / mean_cases
-
-# p <- plot(p) + labs(x = "R4 (mm)", y="Relative Risk", title="")
+# p <- plot(p) + labs(x = paste(marginalVar, "(mm)", sep=" "), y="Relative Risk", title="")
 # ggsave("../../marginal_effect_R4.tiff", units="in", width=5, height=4.2, dpi=300, compression = "lzw")
 
 
-# library("sjPlot")
-# plot_model(res, type = "pred", terms = "T7")
-
-exit()
+exit() # continue to run LOOCV
 
 # summary(res)
 # AICc(res)
@@ -90,13 +88,9 @@ if (showTruePrediction) {
                       predictType=predictType)
 }
 
-exit()
-
 if (!"ALL" %in% areas) {
   areas <- c("ALL", areas)
 }
-
-# pred$PRED <- round(fitted(res))
 
 byyear <- list()
 for (area_i in areas) {
