@@ -55,18 +55,23 @@ if (is.null(formula)) {
   res <- glmmTMB(formula, data=df, family=family, REML=T, se=TRUE)
 }
 
+exit() # continue to run LOOCV
+
 # library("ggeffects")
-# marginalVar <- "R4"
+# marginalVar <- "T7"
+# outputFile <- F
+# outputFilePath <- "../../marginal_effect_R4.tiff"
 # p <- ggpredict(res, c(marginalVar))
 # p$predicted <- p$predicted / mean_cases
 # p$std.error <- p$std.error / nthroot(mean_cases, 2)
 # p$conf.low <- p$conf.low / mean_cases
 # p$conf.high <- p$conf.high / mean_cases
 # p <- plot(p) + labs(x = paste(marginalVar, "(mm)", sep=" "), y="Relative Risk", title="")
-# ggsave("../../marginal_effect_R4.tiff", units="in", width=5, height=4.2, dpi=300, compression = "lzw")
-
-
-exit() # continue to run LOOCV
+# if (outputFile) {
+#   ggsave(outputFilePath , units="in", width=5, height=4.2, dpi=300, compression = "lzw")
+# } else {
+#   p
+# }
 
 # summary(res)
 # AICc(res)
