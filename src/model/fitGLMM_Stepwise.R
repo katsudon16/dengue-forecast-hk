@@ -23,7 +23,7 @@ predictType <- "response"
 useAICc <- TRUE
 # if showTruePrediction = TRUE, show model prediction result,
 #   else, show cross validation prediction results
-showTruePrediction <- FALSE
+showTruePrediction <- F
 #---------------------------------
 source("../lib/retrieveData.R")
 df <- extractAnnualClimateData(temperatureField, temperatureType, rainfallType,
@@ -39,7 +39,6 @@ mins <- apply(df[,c(4:19)], 2, min)
 df[,c(4:19)] <- scale(df[,c(4:19)], center = mins, scale = maxs - mins)
 
 mean_cases <- mean(df$RISK)
-# df$RISK <- df$RISK / mean_cases
 
 
 if (!require("glmmTMB")) install.packages("glmmTMB")
@@ -52,21 +51,22 @@ if (is.null(formula)) {
                      scope=RISK ~ T3 + T4 + T5 + T6 + T7 + T8 + R3 + R4 + R5 + R6 + R7 + R8,
                      direction="forward", useAICc=TRUE)
 } else {
-  res <- glmmTMB(formula, data=df, family=family, REML=T, se=TRUE)
+  res <- glmmTMB(formula, data=df, family=family, REML=F, se=TRUE)
 }
 
 exit() # continue to run LOOCV
 
 # library("ggeffects")
 # marginalVar <- "T7"
-# outputFile <- F
-# outputFilePath <- "../../marginal_effect_R4.tiff"
+# outputFile <- T
+# outputFilePath <- "../../marginal_effect_T7.tiff"
 # p <- ggpredict(res, c(marginalVar))
 # p$predicted <- p$predicted / mean_cases
 # p$std.error <- p$std.error / nthroot(mean_cases, 2)
 # p$conf.low <- p$conf.low / mean_cases
 # p$conf.high <- p$conf.high / mean_cases
-# p <- plot(p) + labs(x = paste(marginalVar, "(mm)", sep=" "), y="Relative Risk", title="")
+# p <- plot(p) + labs(x = paste(marginalVar, "(°C)", sep=" "), y="Relative Risk", title="")
+# # p <- plot(p) + labs(x = paste(marginalVar, "(mm)", sep=" "), y="Relative Risk", title="")
 # if (outputFile) {
 #   ggsave(outputFilePath , units="in", width=5, height=4.2, dpi=300, compression = "lzw")
 # } else {
@@ -78,8 +78,7 @@ exit() # continue to run LOOCV
 # BIC(res)
 
 pred <- NULL
-minYear <- 2003
-df <- df[df$YEAR != 2002,]
+minYear <- 2002
 if (showTruePrediction) {
   pred <- df[c("AREA", "YEAR", "RISK")]
   pred$PRED <- round(predict(res, newdata=df, type=predictType))

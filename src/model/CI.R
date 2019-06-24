@@ -2,7 +2,7 @@ areas <- c("NTS", "NTN", "HKL")
 
 #---------USER INPUTS-------------
 divideByArea <- T
-area_i <- 1
+area_i <- 3
 #---------------------------------
 
 mainTitle <- ifelse(divideByArea, areas[area_i], "All Areas")
@@ -69,18 +69,12 @@ if (divideByArea) {
   if (area_i == 3) {
     # special case: HKL
     # modify for graph only (axis break)
-    gapFrom <- 22
-    gapTo <- 23
-    y_ci[y_ci$year == 2018, "ci_higher"] <- 24
     par(xaxt="n")
-    gap.plot(y_ci$year, y_ci$observed, gap=c(gapFrom, gapTo), xaxt="n",
-             panel.first=c(abline(v=seq(2002, 2018), h=seq(0, 25), col="#d3d3d3", lty=2)),
-             xlab="Year", ylab="Local Cases", type="l", col="red", lwd=2, ylim=c(0, 26),
+    plot(y_ci$year, y_ci$observed, xaxt="n",
+             panel.first=c(abline(v=seq(2002, 2018), h=seq(0, 27), col="#d3d3d3", lty=2)),
+             xlab="Year", ylab="Local Cases", type="l", col="red", lwd=2, ylim=c(0, 27),
              main=mainTitle)
-    axis.break(2, gapFrom, breakcol="snow", style="gap")
-    axis.break(2, gapFrom, breakcol="black", style="slash")
-    axis.break(4, gapFrom, breakcol="black", style="slash")
-    axis(2, at=25, labels=30)
+    axis(2, seq(0, 25, 5))
   } else {
     plot(y_ci$year, y_ci$observed, xaxt="n",
              panel.first=c(abline(v=seq(2002, 2018), h=seq(0, 20), col="#d3d3d3", lty=2)),
@@ -93,20 +87,15 @@ if (divideByArea) {
 } else {
   # all fields
   # modify for graph only (axis break)
-  gapFrom <- 32
-  gapTo <- 33
-  y_ci[y_ci$year == 2018, "ci_higher"] <- 35
   par(xaxt="n")
-  gap.plot(y_ci$year, y_ci$observed, gap=c(gapFrom, gapTo), xaxt="n",
-           panel.first=c(abline(v=seq(2002, 2018), h=seq(0, 35), col="#d3d3d3", lty=2)),
+  plot(y_ci$year, y_ci$observed, xaxt="n",
+           panel.first=c(abline(v=seq(2002, 2018), h=seq(0, 37), col="#d3d3d3", lty=2)),
            xlab="Year", ylab="Local Cases", type="l", col="red", lwd=2, ylim=c(0, 37),
            main=mainTitle)
-  axis.break(2, gapFrom, breakcol="snow", style="gap")
-  axis.break(2, gapFrom, breakcol="black", style="slash")
-  axis.break(4, gapFrom, breakcol="black", style="slash")
-  axis(2, at=35, labels=40)
+  axis(2, seq(0, 35, 5))
   legend("topright", legend=c("observed", "estimated"), col=c("red", "blue"),
-         lty=1:2, lwd=2:2, cex=1.1, inset=c(0.06, 0.02))}
+         lty=1:2, lwd=2:2, cex=1.1, inset=c(0.06, 0.02))
+}
 par(xaxt="s")
 axis(1, at=seq(2002, 2018, by=2))
 lines(y_ci$year, y_ci$estimated, col="blue", lty=5, lwd=2)
