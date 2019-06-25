@@ -15,13 +15,15 @@ rainfallType <- "total"
 minYear <- 2002
 maxYear <- 2018
 areas <- c("NTS", "NTN", "HKL")
-
 fixedVarsList <- c("T3", "T4", "T5", "T7", "R4", "R5", "R6")
 randomVarsList <- c("AREA")
 family <- poisson # poisson or nbinom2
 #---------------------------------
 
 source("../lib/retrieveData.R")
+library("glmmTMB")
+source("../lib/LRT.R")
+
 df <- extractAnnualClimateData(temperatureField, temperatureType, rainfallType,
                                areas, minYear=minYear, maxYear=maxYear)
 
@@ -29,6 +31,4 @@ maxs <- apply(df[,c(4:19)], 2, max)
 mins <- apply(df[,c(4:19)], 2, min)
 df[,c(4:19)] <- scale(df[,c(4:19)], center = mins, scale = maxs - mins)
 
-library("glmmTMB")
-source("../lib/LRT.R")
 runLRT("RISK", fixedVarsList, randomVarsList, data=df, glmmTMB, family=family, REML=F)

@@ -60,7 +60,7 @@ getGLM <- function(Ttype="mean", Rtype="max", location="CC", temperatureColName=
 # - rank (function) : function used to rank different models e.g., AIC, AICc
 # - model1, model 2, ... (models)
 # returns the selection summary
-getGLMSummary <- function(..., rank=AICc) {
+compareGLMs <- function(..., rank=AICc) {
   library(MuMIn)
   selectionSummary <- model.sel(rank=rank, ...)
   return(selectionSummary)

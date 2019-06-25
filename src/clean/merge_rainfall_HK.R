@@ -5,7 +5,7 @@
 rm(list=ls(all=TRUE))
 if (!require(openxlsx)) install.packages("openxlsx")
 
-# daily data
+# daily data--------------------------------------------
 excelFile <- "../../dat/climate/HKCD_test.xlsx"
 daily <- read.xlsx("../../dat/climate/HK_rainfall.xlsx",
                    sheet="Daily",
