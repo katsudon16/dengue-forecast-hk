@@ -21,6 +21,7 @@ for (d in districts) {
   data[[d]] <- df
 }
 
+# Ensure all data have the same # rows and time (date)
 isDateValid <- function(i) {
   isDateSame <- TRUE
   date <- list()
@@ -40,6 +41,7 @@ isDateValid <- function(i) {
   return(isDateSame)
 }
 
+# obtain the total # days of the month and the year
 getTotalDays <- function(year, month) {
   oddMonths <- c(1, 3, 5, 7, 8, 10, 12)
   if (month %in% oddMonths) return(31)
@@ -54,6 +56,7 @@ getTotalDays <- function(year, month) {
   return(30)
 }
 
+# generate average for row i
 getAverageRow <- function(i) {
   row <- list()
   avgCols <- c("pressure", "avgmax", "avg", "avgmin", "dewpoint",
@@ -77,9 +80,11 @@ getAverageRow <- function(i) {
       if (col %in% avgCols) {
         if (districts[d_i] == "HK") {
           if (col == "totalrain") {
-            totalValidDays <- totalValidDays + 4 * totalDays
-            avg <- avg + totalDays * 4 * data[[districts[d_i]]][[col]][i]
+            # 3 monthly rain data were used for HK area
+            totalValidDays <- totalValidDays + 3 * totalDays
+            avg <- avg + totalDays * 3 * data[[districts[d_i]]][[col]][i]
           } else {
+            # 2 monthly weather data were used for HK area
             totalValidDays <- totalValidDays + 2 * totalDays
             avg <- avg + totalDays * 2 * data[[districts[d_i]]][[col]][i]
           }
@@ -112,7 +117,7 @@ getAverageRow <- function(i) {
 }
 
 avg_df <- data.frame()
-# clean
+# clean and remove "#"
 for (d in districts) {
   for (col in colnames(data[[districts[1]]])) {
     data[[d]][col] <- as.numeric(gsub("[^.0-9]", "", data[[d]][col][,]))

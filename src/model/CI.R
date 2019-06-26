@@ -15,6 +15,7 @@ y_hat_pool <- matrix(NA, 1000, n)
 if (!require("glmmTMB")) install.packages("glmmTMB")
 library("glmmTMB")
 
+# simulation_begin-----------------
 for (i in 1:1000) {
   y_sim <- rpois(n, lambda)
   df$y_sim <- y_sim
@@ -22,6 +23,7 @@ for (i in 1:1000) {
                        data=df, family=family, REML=TRUE)
   y_hat_pool[i,] <- round(fitted(model_sim))
 }
+# simulation_end-------------------
 
 if (divideByArea == T) {
   estimated <- lambda
@@ -61,7 +63,7 @@ if (divideByArea == T) {
   y_ci$year <- seq(2002, 2018, 1)
 }
 
-exit() # check y_ci for consistency with the paper if needed
+pause() # check y_ci for consistency with the paper if needed
 
 library(plotrix)
 

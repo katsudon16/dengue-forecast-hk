@@ -30,16 +30,16 @@ df <- extractAnnualClimateData(temperatureField, temperatureType, rainfallType,
                                areas, minYear=minYear, maxYear=maxYear)
 
 library(pracma)
+# generate NRMSE given RMSE value (training / validation)
+# example: findNRMSE(6.5234)
 findNRMSE <- function(val) {
-    return (nthroot(val, 2) / 19)
+    return (nthroot(val, 2) / 19) # 19 = range(RISK)
 }
 
+# 0-1 normalization
 maxs <- apply(df[,c(4:19)], 2, max)
 mins <- apply(df[,c(4:19)], 2, min)
 df[,c(4:19)] <- scale(df[,c(4:19)], center = mins, scale = maxs - mins)
-
-mean_cases <- mean(df$RISK)
-
 
 if (!require("glmmTMB")) install.packages("glmmTMB")
 library("glmmTMB")
@@ -54,24 +54,7 @@ if (is.null(formula)) {
   res <- glmmTMB(formula, data=df, family=family, REML=F, se=TRUE)
 }
 
-exit() # continue to run LOOCV
-
-# library("ggeffects")
-# marginalVar <- "T7"
-# outputFile <- T
-# outputFilePath <- "../../marginal_effect_T7.tiff"
-# p <- ggpredict(res, c(marginalVar))
-# p$predicted <- p$predicted / mean_cases
-# p$std.error <- p$std.error / nthroot(mean_cases, 2)
-# p$conf.low <- p$conf.low / mean_cases
-# p$conf.high <- p$conf.high / mean_cases
-# p <- plot(p) + labs(x = paste(marginalVar, "(°C)", sep=" "), y="Relative Risk", title="")
-# # p <- plot(p) + labs(x = paste(marginalVar, "(mm)", sep=" "), y="Relative Risk", title="")
-# if (outputFile) {
-#   ggsave(outputFilePath , units="in", width=5, height=4.2, dpi=300, compression = "lzw")
-# } else {
-#   p
-# }
+pause() # continue to run LOOCV
 
 # summary(res)
 # AICc(res)
@@ -85,6 +68,7 @@ if (showTruePrediction) {
   pred[pred$PRED < 0, "PRED"] <- 0
   pred$AREA <- as.numeric(pred$AREA)
 } else {
+  # run leave-one-out
   source("../lib/cross_validations.R")
   pred <- leaveOneOut(df, "RISK", res, modelType=glmmTMB,
                       resDfCols=c("AREA", "YEAR", "RISK"),
@@ -96,6 +80,7 @@ if (!"ALL" %in% areas) {
   areas <- c("ALL", areas)
 }
 
+# plot the graph (predicted >< observed) for all areas
 byyear <- list()
 for (area_i in areas) {
   print(area_i)

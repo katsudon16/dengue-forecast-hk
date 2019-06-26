@@ -21,6 +21,7 @@ for (d in districts) {
   data[[d]] <- df
 }
 
+# Ensure all data have the same # rows and time (date)
 isDateValid <- function(i) {
   isDateSame <- TRUE
   date <- list()
@@ -42,6 +43,7 @@ isDateValid <- function(i) {
   return(isDateSame)
 }
 
+# generate average for row i
 getAverageRow <- function(i) {
   row <- list()
   for (col_i in 1:length(colnames(data[[districts[1]]]))) {
@@ -58,9 +60,11 @@ getAverageRow <- function(i) {
       isNA <- FALSE
       if (districts[d_i] == "HK") {
         if (col == "Total.Rainfall.(mm)") {
+          # 3 rain stations were used for HK area
           total <- total + 3
           avg <- avg + 3 * data[[districts[d_i]]][[col]][i]
         } else {
+          # 2 weather stations were used for HK area
           total <- total + 2
           avg <- avg + 2 * data[[districts[d_i]]][[col]][i]
         }
@@ -80,7 +84,7 @@ getAverageRow <- function(i) {
 }
 
 avg_df <- data.frame()
-# clean
+# clean and remove "#"
 for (d in districts) {
   for (col in colnames(data[[districts[1]]])) {
     data[[d]][col] <- as.numeric(gsub("[^.0-9]", "", data[[d]][col][,]))
